@@ -42,7 +42,7 @@ namespace NotesApp.UnitTests.Api
             var result = await _usersController.RegisterAsync(userRegisterDto);
 
             // Assert
-   
+
             result.Should().BeOfType<OkObjectResult>()
                 .Which.Value.Should().BeEquivalentTo(serviceResponse);
         }
@@ -68,6 +68,25 @@ namespace NotesApp.UnitTests.Api
             result.Should().BeOfType<BadRequestObjectResult>()
                 .Which.Value.Should().BeEquivalentTo(serviceResponse);
         }
+
+
+        [Fact]
+        public async Task Register_ShouldReturnBadRequest_WhenExceptionIsThrown()
+        {
+            // Arrange
+            var userRegisterDto = _fixture.Create<UserRegisterDto>();
+
+            _userServiceMock.Setup(x => x.RegisterUserAsync(userRegisterDto))
+                .ThrowsAsync(new Exception("Error"));
+
+            // Act
+            var result = await _usersController.RegisterAsync(userRegisterDto);
+
+            // Assert
+            result.Should().BeOfType<StatusCodeResult>().Which.StatusCode.Should().Be(500);
+
+        }
+
 
     }
 
