@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using NotesApp.Api.Middlewares;
-using NotesApp.Application.Services.User;
+using NotesApp.Application.Services.Users;
+using NotesApp.Domain.RepositoryInterfaces;
 using NotesApp.Infrastructure.Data;
+using NotesApp.Infrastructure.Repositories;
+using NotesApp.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -12,6 +15,8 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

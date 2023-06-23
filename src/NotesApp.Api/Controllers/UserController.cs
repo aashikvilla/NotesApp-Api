@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NotesApp.Application.Dto;
-using NotesApp.Application.Services.User;
+using NotesApp.Application.Services.Users;
 
 namespace NotesApp.Api.Controllers
 {

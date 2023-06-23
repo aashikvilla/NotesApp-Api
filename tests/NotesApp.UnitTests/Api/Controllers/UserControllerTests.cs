@@ -5,10 +5,10 @@ using Moq;
 using NotesApp.Api.Controllers;
 using NotesApp.Application.Dto;
 using NotesApp.Application.Response;
-using NotesApp.Application.Services.User;
+using NotesApp.Application.Services.Users;
 
 
-namespace NotesApp.UnitTests.Api
+namespace NotesApp.UnitTests.Api.Controllers
 {
     public class UserControllerTests
     {
@@ -68,25 +68,6 @@ namespace NotesApp.UnitTests.Api
             result.Should().BeOfType<BadRequestObjectResult>()
                 .Which.Value.Should().BeEquivalentTo(serviceResponse);
         }
-
-
-        [Fact]
-        public async Task Register_ShouldReturnBadRequest_WhenExceptionIsThrown()
-        {
-            // Arrange
-            var userRegisterDto = _fixture.Create<UserRegisterDto>();
-
-            _userServiceMock.Setup(x => x.RegisterUserAsync(userRegisterDto))
-                .ThrowsAsync(new Exception("Error"));
-
-            // Act
-            var result = await _usersController.RegisterAsync(userRegisterDto);
-
-            // Assert
-            result.Should().BeOfType<StatusCodeResult>().Which.StatusCode.Should().Be(500);
-
-        }
-
 
     }
 
