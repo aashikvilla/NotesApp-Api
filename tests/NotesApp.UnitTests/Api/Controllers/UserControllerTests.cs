@@ -69,6 +69,52 @@ namespace NotesApp.UnitTests.Api.Controllers
                 .Which.Value.Should().BeEquivalentTo(serviceResponse);
         }
 
+        [Fact]
+        public async Task LoginAsync_ShouldReturnOk_WhenLoginCredentialsAreValid()
+        {
+            // Arrange
+            var userLoginDto = _fixture.Create<UserLoginDto>();
+            var serviceResponse = new ServiceResponse<UserDto>
+            {
+                Data = _fixture.Create<UserDto>(),
+                Success = true,
+                Message = "Log in successful."
+            };
+
+            _userServiceMock.Setup(x => x.LoginUserAsync(userLoginDto))
+                .ReturnsAsync(serviceResponse);
+
+            // Act
+            var result = await _usersController.LoginAsync(userLoginDto);
+
+            // Assert
+
+            result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(serviceResponse);
+        }
+
+        [Fact]
+        public async Task LoginAsync_ShouldReturnBadRequest_WhenLoginCredentialsAreInvalid()
+        {
+            // Arrange
+            var userLoginDto = _fixture.Create<UserLoginDto>();
+            var serviceResponse = new ServiceResponse<UserDto>
+            {
+                Success = false,
+                Message = "Invalid password."
+            };
+
+            _userServiceMock.Setup(x => x.LoginUserAsync(userLoginDto))
+                .ReturnsAsync(serviceResponse);
+
+            // Act
+            var result = await _usersController.LoginAsync(userLoginDto);
+
+            // Assert
+            result.Should().BeOfType<BadRequestObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(serviceResponse);
+        }
+
     }
 
 }

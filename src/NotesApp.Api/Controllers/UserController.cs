@@ -27,6 +27,20 @@ namespace NotesApp.Api.Controllers
 
             return BadRequest(result);
         }
+
+
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginAsync(UserLoginDto userLoginDto)
+        {
+            var serviceResponse = await _userService.LoginUserAsync(userLoginDto);
+
+            if (!serviceResponse.Success)
+            {
+                return BadRequest(serviceResponse);
+            }
+
+            return Ok(serviceResponse);
+        }
     }
 
 }
