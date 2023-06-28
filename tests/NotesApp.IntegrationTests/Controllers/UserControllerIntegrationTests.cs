@@ -42,6 +42,7 @@ namespace NotesApp.IntegrationTests.Controllers
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             var serviceResponse = await response.Content.ReadFromJsonAsync<ServiceResponse<UserDto>>();
             serviceResponse.Success.Should().BeTrue();
+            serviceResponse.Message.Should().BeEquivalentTo(ResponseMessages.RegistrationSuccessful);
             //check if id is auto generated
             serviceResponse.Data.Id.Should().BeGreaterThan(0);
             serviceResponse.Data.Email.Should().BeEquivalentTo(userRegisterDto.Email);
