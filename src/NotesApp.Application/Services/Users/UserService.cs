@@ -42,6 +42,7 @@ namespace NotesApp.Application.Services.Users
 
                 UserDto userDto = new UserDto
                 {
+                    Id = user.Id,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Email = user.Email
@@ -85,6 +86,7 @@ namespace NotesApp.Application.Services.Users
 
                 UserDto userDto = new UserDto
                 {
+                    Id = user.Id,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Email = user.Email,

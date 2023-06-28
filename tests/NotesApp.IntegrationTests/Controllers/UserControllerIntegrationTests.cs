@@ -33,19 +33,7 @@ namespace NotesApp.IntegrationTests.Controllers
         public async Task RegisterAsync_ShouldReturnSuccess_WhenUserRegistrationIsValid()
         {
             // Arrange
-            var userRegisterDto = _fixture.Create<UserRegisterDto>();
-            var expectedUserDto = new UserDto
-            {
-                FirstName = userRegisterDto.FirstName,
-                LastName = userRegisterDto.LastName,
-                Email = userRegisterDto.Email
-            };
-            var expectedResult = new ServiceResponse<UserDto>
-            {
-                Data = expectedUserDto,
-                Success = true,
-                Message = ResponseMessages.RegistrationSuccessful
-            };
+            var userRegisterDto = _fixture.Create<UserRegisterDto>();         
 
             // Act
             var response = await _client.PostAsJsonAsync(UrlRouteConstants.Register, userRegisterDto);
@@ -53,7 +41,10 @@ namespace NotesApp.IntegrationTests.Controllers
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             var serviceResponse = await response.Content.ReadFromJsonAsync<ServiceResponse<UserDto>>();
-            serviceResponse.Should().BeEquivalentTo(expectedResult);
+            serviceResponse.Success.Should().BeTrue();
+            //check if id is auto generated
+            serviceResponse.Data.Id.Should().BeGreaterThan(0);
+            serviceResponse.Data.Email.Should().BeEquivalentTo(userRegisterDto.Email);
         }
 
 

@@ -92,6 +92,7 @@ namespace NotesApp.UnitTests.Application.Services
             var jwtToken = _fixture.Create<string>();
             var userDto = new UserDto
             {
+                Id = user.Id,
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
