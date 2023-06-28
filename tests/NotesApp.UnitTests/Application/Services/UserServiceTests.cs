@@ -118,10 +118,10 @@ namespace NotesApp.UnitTests.Application.Services
             };
 
             // Act
-            var actualResult = await _userService.LoginUserAsync(loginUserDto);
+            var result = await _userService.LoginUserAsync(loginUserDto);
 
             // Assert
-            actualResult.Should().BeEquivalentTo(expectedResult);
+            result.Should().BeEquivalentTo(expectedResult);
         }
 
         [Fact]
@@ -139,10 +139,10 @@ namespace NotesApp.UnitTests.Application.Services
             };
 
             // Act
-            var actualResult = await _userService.LoginUserAsync(loginUserDto);
+            var result = await _userService.LoginUserAsync(loginUserDto);
 
             // Assert
-            actualResult.Should().BeEquivalentTo(expectedResult);
+            result.Should().BeEquivalentTo(expectedResult);
         }
 
         [Fact]
@@ -164,10 +164,10 @@ namespace NotesApp.UnitTests.Application.Services
             };
 
             // Act
-            var actualResult = await _userService.LoginUserAsync(loginUserDto);
+            var result = await _userService.LoginUserAsync(loginUserDto);
 
             // Assert
-            actualResult.Should().BeEquivalentTo(expectedResult);
+            result.Should().BeEquivalentTo(expectedResult);
         }
 
     }
