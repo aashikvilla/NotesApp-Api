@@ -97,11 +97,38 @@ namespace NotesApp.Application.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Note already exists..
+        /// </summary>
+        public static string NoteAlreadyExists {
+            get {
+                return ResourceManager.GetString("NoteAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Note not found..
+        /// </summary>
+        public static string NoteNotFound {
+            get {
+                return ResourceManager.GetString("NoteNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User registered successfully..
         /// </summary>
         public static string RegistrationSuccessful {
             get {
                 return ResourceManager.GetString("RegistrationSuccessful", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User not found..
+        /// </summary>
+        public static string UserNotFound {
+            get {
+                return ResourceManager.GetString("UserNotFound", resourceCulture);
             }
         }
     }

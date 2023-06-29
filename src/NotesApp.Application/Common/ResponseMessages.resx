@@ -129,7 +129,16 @@
   <data name="LoginSuccessful" xml:space="preserve">
     <value>Logged in successfully.</value>
   </data>
+  <data name="NoteAlreadyExists" xml:space="preserve">
+    <value>Note already exists.</value>
+  </data>
+  <data name="NoteNotFound" xml:space="preserve">
+    <value>Note not found.</value>
+  </data>
   <data name="RegistrationSuccessful" xml:space="preserve">
     <value>User registered successfully.</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>User not found.</value>
   </data>
 </root>
