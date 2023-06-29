@@ -3,8 +3,8 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NotesApp.Api.Controllers;
+using NotesApp.Application.Common;
 using NotesApp.Application.Dto;
-using NotesApp.Application.Response;
 using NotesApp.Application.Services.Users;
 
 
@@ -28,45 +28,34 @@ namespace NotesApp.UnitTests.Api.Controllers
         {
             // Arrange
             var userRegisterDto = _fixture.Create<UserRegisterDto>();
-            var serviceResponse = new ServiceResponse<UserDto>
-            {
-                Data = _fixture.Create<UserDto>(),
-                Success = true,
-                Message = "Registration successful."
-            };
+            var expectedUserDto = _fixture.Create<UserDto>();
 
             _userServiceMock.Setup(x => x.RegisterUserAsync(userRegisterDto))
-                .ReturnsAsync(serviceResponse);
+                .ReturnsAsync(expectedUserDto);
 
             // Act
-            var result = await _usersController.RegisterAsync(userRegisterDto);
+            var resultTask = _usersController.RegisterAsync(userRegisterDto);
 
             // Assert
-
+            var result = await resultTask;
             result.Should().BeOfType<OkObjectResult>()
-                .Which.Value.Should().BeEquivalentTo(serviceResponse);
+                .Which.Value.Should().BeEquivalentTo(expectedUserDto);
         }
 
         [Fact]
-        public async Task RegisterAsync_ShouldReturnBadRequest_WhenUserRegistrationFails()
+        public async Task RegisterAsync_ShouldThrowException_WhenUserRegistrationFails()
         {
             // Arrange
             var userRegisterDto = _fixture.Create<UserRegisterDto>();
-            var serviceResponse = new ServiceResponse<UserDto>
-            {
-                Success = false,
-                Message = "Registration failed."
-            };
 
             _userServiceMock.Setup(x => x.RegisterUserAsync(userRegisterDto))
-                .ReturnsAsync(serviceResponse);
+                .Throws(new InvalidOperationException(ResponseMessages.EmailAlreadyExists));
 
             // Act
-            var result = await _usersController.RegisterAsync(userRegisterDto);
+            Func<Task> act = () => _usersController.RegisterAsync(userRegisterDto);
 
             // Assert
-            result.Should().BeOfType<BadRequestObjectResult>()
-                .Which.Value.Should().BeEquivalentTo(serviceResponse);
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage(ResponseMessages.EmailAlreadyExists);
         }
 
         [Fact]
@@ -74,46 +63,36 @@ namespace NotesApp.UnitTests.Api.Controllers
         {
             // Arrange
             var userLoginDto = _fixture.Create<UserLoginDto>();
-            var serviceResponse = new ServiceResponse<UserDto>
-            {
-                Data = _fixture.Create<UserDto>(),
-                Success = true,
-                Message = "Log in successful."
-            };
+            var expectedUserDto = _fixture.Create<UserDto>();
 
             _userServiceMock.Setup(x => x.LoginUserAsync(userLoginDto))
-                .ReturnsAsync(serviceResponse);
+                .ReturnsAsync(expectedUserDto);
 
             // Act
-            var result = await _usersController.LoginAsync(userLoginDto);
+            var resultTask = _usersController.LoginAsync(userLoginDto);
 
             // Assert
-
+            var result = await resultTask;
             result.Should().BeOfType<OkObjectResult>()
-                .Which.Value.Should().BeEquivalentTo(serviceResponse);
+                .Which.Value.Should().BeEquivalentTo(expectedUserDto);
         }
 
         [Fact]
-        public async Task LoginAsync_ShouldReturnBadRequest_WhenLoginCredentialsAreInvalid()
+        public async Task LoginAsync_ShouldThrowException_WhenLoginCredentialsAreInvalid()
         {
             // Arrange
             var userLoginDto = _fixture.Create<UserLoginDto>();
-            var serviceResponse = new ServiceResponse<UserDto>
-            {
-                Success = false,
-                Message = "Invalid password."
-            };
 
             _userServiceMock.Setup(x => x.LoginUserAsync(userLoginDto))
-                .ReturnsAsync(serviceResponse);
+                .Throws(new Exception("Invalid password."));
 
             // Act
-            var result = await _usersController.LoginAsync(userLoginDto);
+            Func<Task> act = () => _usersController.LoginAsync(userLoginDto);
 
             // Assert
-            result.Should().BeOfType<BadRequestObjectResult>()
-                .Which.Value.Should().BeEquivalentTo(serviceResponse);
+            await act.Should().ThrowAsync<Exception>().WithMessage("Invalid password.");
         }
+
 
     }
 

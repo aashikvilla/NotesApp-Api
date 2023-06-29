@@ -3,7 +3,6 @@ using FluentAssertions;
 using Moq;
 using NotesApp.Application.Common;
 using NotesApp.Application.Dto;
-using NotesApp.Application.Response;
 using NotesApp.Application.Services.Users;
 using NotesApp.Domain.Entities;
 using NotesApp.Domain.RepositoryInterfaces;
@@ -25,7 +24,7 @@ namespace NotesApp.UnitTests.Application.Services
         }
 
         [Fact]
-        public async Task RegisterUserAsync_ShouldReturnFailure_WhenEmailAlreadyExists()
+        public async Task RegisterUserAsync_ShouldThrowException_WhenEmailAlreadyExists()
         {
             // Arrange
             var userRegisterDto = _fixture.Create<UserRegisterDto>();
@@ -35,15 +34,14 @@ namespace NotesApp.UnitTests.Application.Services
                 .ReturnsAsync(existingUser);
 
             // Act
-            var result = await _userService.RegisterUserAsync(userRegisterDto);
+            Func<Task> act = async () => await _userService.RegisterUserAsync(userRegisterDto);
 
             // Assert
-            result.Success.Should().BeFalse();
-            result.Message.Should().Be(ResponseMessages.EmailAlreadyExists);
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage(ResponseMessages.EmailAlreadyExists);
         }
 
         [Fact]
-        public async Task RegisterUserAsync_ShouldReturnSuccess_WhenUserIsRegisteredSuccessfully()
+        public async Task RegisterUserAsync_ShouldReturnUserDto_WhenUserIsRegisteredSuccessfully()
         {
             // Arrange
             var userRegisterDto = _fixture.Create<UserRegisterDto>();
@@ -61,19 +59,11 @@ namespace NotesApp.UnitTests.Application.Services
                 Email = userRegisterDto.Email
             };
 
-            var expectedResult = new ServiceResponse<UserDto>
-            {
-                Data = expectedUserDto,
-                Success = true,
-                Message = ResponseMessages.RegistrationSuccessful
-            };
-
             // Act
             var result = await _userService.RegisterUserAsync(userRegisterDto);
 
             // Assert
-
-            result.Should().BeEquivalentTo(expectedResult);
+            result.Should().BeEquivalentTo(expectedUserDto);
 
             _userRepositoryMock.Verify(x => x.AddUserAsync(It.Is<User>(u =>
                 u.FirstName == userRegisterDto.FirstName &&
@@ -82,6 +72,8 @@ namespace NotesApp.UnitTests.Application.Services
                 u.Password == _passwordHasherMock.Object.HashPassword(userRegisterDto.Password)
             )), Times.Once);
         }
+
+      
 
         [Fact]
         public async Task LoginAsync_ShouldReturnUserDto_WhenCredentialsAreValid()
@@ -98,7 +90,6 @@ namespace NotesApp.UnitTests.Application.Services
                 LastName = user.LastName,
                 Token = jwtToken
             };
-          
 
             _userRepositoryMock.Setup(x => x.GetUserByEmailAsync(loginUserDto.Email))
                 .ReturnsAsync(user);
@@ -111,22 +102,15 @@ namespace NotesApp.UnitTests.Application.Services
 
             userDto.Token = jwtToken;
 
-            var expectedResult = new ServiceResponse<UserDto>
-            {
-                Data = userDto,
-                Success = true,
-                Message =ResponseMessages.LoginSuccessful
-            };
-
             // Act
             var result = await _userService.LoginUserAsync(loginUserDto);
 
             // Assert
-            result.Should().BeEquivalentTo(expectedResult);
+            result.Should().BeEquivalentTo(userDto);
         }
 
         [Fact]
-        public async Task LoginAsync_ShouldReturnNullData_WhenUserDoesNotExist()
+        public async Task LoginAsync_ShouldThrowException_WhenUserDoesNotExist()
         {
             // Arrange
             var loginUserDto = _fixture.Create<UserLoginDto>();
@@ -134,20 +118,15 @@ namespace NotesApp.UnitTests.Application.Services
             _userRepositoryMock.Setup(x => x.GetUserByEmailAsync(loginUserDto.Email))
                 .ReturnsAsync((User)null);
 
-            var expectedResult = new ServiceResponse<UserDto>
-            { 
-                Message =ResponseMessages.EmailNotFound
-            };
-
             // Act
-            var result = await _userService.LoginUserAsync(loginUserDto);
+            Func<Task> act = async () => await _userService.LoginUserAsync(loginUserDto);
 
             // Assert
-            result.Should().BeEquivalentTo(expectedResult);
+            await act.Should().ThrowAsync<UnauthorizedAccessException>().WithMessage(ResponseMessages.EmailNotFound);
         }
 
         [Fact]
-        public async Task LoginAsync_ShouldReturnNullData_WhenPasswordIsNotValid()
+        public async Task LoginAsync_ShouldThrowException_WhenPasswordIsNotValid()
         {
             // Arrange
             var loginUserDto = _fixture.Create<UserLoginDto>();
@@ -159,17 +138,13 @@ namespace NotesApp.UnitTests.Application.Services
             _passwordHasherMock.Setup(x => x.VerifyPassword(user.Password, loginUserDto.Password))
                 .Returns(false);
 
-            var expectedResult = new ServiceResponse<UserDto>
-            {
-                Message =ResponseMessages.InvalidPassword
-            };
-
             // Act
-            var result = await _userService.LoginUserAsync(loginUserDto);
+            Func<Task> act = async () => await _userService.LoginUserAsync(loginUserDto);
 
             // Assert
-            result.Should().BeEquivalentTo(expectedResult);
+            await act.Should().ThrowAsync<UnauthorizedAccessException>().WithMessage(ResponseMessages.InvalidPassword);
         }
+
 
     }
 

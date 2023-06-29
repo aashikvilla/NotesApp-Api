@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using NotesApp.Application.Common;
 using NotesApp.Application.Dto;
-using NotesApp.Application.Response;
 using NotesApp.Infrastructure.Data;
 using NotesApp.IntegrationTests.Helpers;
 using NotesApp.IntegrationTests.TestConstants;
@@ -40,12 +39,11 @@ namespace NotesApp.IntegrationTests.Controllers
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            var serviceResponse = await response.Content.ReadFromJsonAsync<ServiceResponse<UserDto>>();
-            serviceResponse.Success.Should().BeTrue();
-            serviceResponse.Message.Should().BeEquivalentTo(ResponseMessages.RegistrationSuccessful);
+            var userDto = await response.Content.ReadFromJsonAsync<UserDto>();
+
             //check if id is auto generated
-            serviceResponse.Data.Id.Should().BeGreaterThan(0);
-            serviceResponse.Data.Email.Should().BeEquivalentTo(userRegisterDto.Email);
+            userDto.Id.Should().BeGreaterThan(0);
+            userDto.Email.Should().BeEquivalentTo(userRegisterDto.Email);
         }
 
 
@@ -62,9 +60,9 @@ namespace NotesApp.IntegrationTests.Controllers
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-            var serviceResponse = await response.Content.ReadFromJsonAsync<ServiceResponse<UserDto>>();
-            serviceResponse.Success.Should().BeFalse();
-            serviceResponse.Message.Should().BeEquivalentTo(ResponseMessages.EmailAlreadyExists);
+            var message = await response.Content.ReadAsStringAsync();
+            message.Should().Contain(ResponseMessages.EmailAlreadyExists);
+         
         }
 
 
@@ -81,14 +79,13 @@ namespace NotesApp.IntegrationTests.Controllers
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var serviceResponse = await response.Content.ReadFromJsonAsync<ServiceResponse<UserDto>>();
-            serviceResponse.Success.Should().BeTrue();
-            serviceResponse.Message.Should().BeEquivalentTo(ResponseMessages.LoginSuccessful);
+            var userDto = await response.Content.ReadFromJsonAsync<UserDto>();
+
             //check if token is generated
-            serviceResponse.Data.Token.Should().NotBeNullOrEmpty();
+            userDto.Token.Should().NotBeNullOrEmpty();
             //check if data matches seed data
-            serviceResponse.Data.FirstName.Should().BeEquivalentTo(userDetailsFromSeedData.FirstName);
-            serviceResponse.Data.LastName.Should().BeEquivalentTo(userDetailsFromSeedData.LastName);
+            userDto.FirstName.Should().BeEquivalentTo(userDetailsFromSeedData.FirstName);
+            userDto.LastName.Should().BeEquivalentTo(userDetailsFromSeedData.LastName);
 
         }
 
@@ -107,10 +104,10 @@ namespace NotesApp.IntegrationTests.Controllers
             var response = await _client.PostAsJsonAsync(UrlRouteConstants.Login, userLoginDto);
 
             // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-            var serviceResponse = await response.Content.ReadFromJsonAsync<ServiceResponse<UserDto>>();
-            serviceResponse.Success.Should().BeFalse();
-            serviceResponse.Message.Should().BeEquivalentTo(ResponseMessages.InvalidPassword);
+            
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            var message = await response.Content.ReadAsStringAsync();
+            message.Should().BeEquivalentTo(ResponseMessages.InvalidPassword);
         }
 
 
@@ -131,10 +128,9 @@ namespace NotesApp.IntegrationTests.Controllers
             var response = await _client.PostAsJsonAsync(UrlRouteConstants.Login, userLoginDto);
 
             // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-            var serviceResponse = await response.Content.ReadFromJsonAsync<ServiceResponse<UserDto>>();
-            serviceResponse.Success.Should().BeFalse();
-            serviceResponse.Message.Should().BeEquivalentTo(ResponseMessages.EmailNotFound);
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            var message = await response.Content.ReadAsStringAsync();
+            message.Should().BeEquivalentTo(ResponseMessages.EmailNotFound);
         }
 
     }

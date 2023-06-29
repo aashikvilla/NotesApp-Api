@@ -1,5 +1,4 @@
-﻿using NotesApp.Application.Response;
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
 
 namespace NotesApp.Api.Middlewares
@@ -33,19 +32,39 @@ namespace NotesApp.Api.Middlewares
         private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-            var response = new ServiceResponse<string>
+            string message = exception.Message;
+            HttpStatusCode statusCode;
+
+            switch (exception)
             {
-                Data = "Internal Server Error from the custom middleware.",
-                Message = "Error : " + exception.Message,
-                Success = false,
+                case InvalidOperationException:
+                    statusCode = HttpStatusCode.BadRequest;
+                    break;
+                case KeyNotFoundException:
+                    statusCode = HttpStatusCode.NotFound;
+                    break;
+                case UnauthorizedAccessException:
+                    statusCode = HttpStatusCode.Unauthorized;
+                    break;
+                default:
+                    statusCode = HttpStatusCode.InternalServerError;
+                    message = "Internal Server Error from the custom middleware.";
+                    break;
+            }
+
+            context.Response.StatusCode = (int)statusCode;
+
+            var response = new
+            {
+                Message = message,
             };
 
             var result = JsonSerializer.Serialize(response);
 
             return context.Response.WriteAsync(result);
         }
+
     }
 
 }

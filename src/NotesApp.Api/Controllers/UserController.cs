@@ -18,28 +18,15 @@ namespace NotesApp.Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync(UserRegisterDto request)
         {
-            var result = await _userService.RegisterUserAsync(request);
-
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-
-            return BadRequest(result);
+            var userDto = await _userService.RegisterUserAsync(request);
+            return Ok(userDto);
         }
-
 
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync(UserLoginDto userLoginDto)
         {
-            var serviceResponse = await _userService.LoginUserAsync(userLoginDto);
-
-            if (!serviceResponse.Success)
-            {
-                return BadRequest(serviceResponse);
-            }
-
-            return Ok(serviceResponse);
+            var userDto = await _userService.LoginUserAsync(userLoginDto);
+            return Ok(userDto);
         }
     }
 

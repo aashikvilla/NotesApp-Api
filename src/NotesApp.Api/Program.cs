@@ -17,10 +17,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IPasswordHasher, PasswordHasher>();
+builder.Services.AddTransient<ITokenService, TokenService>();
 
 // JWT settings
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
