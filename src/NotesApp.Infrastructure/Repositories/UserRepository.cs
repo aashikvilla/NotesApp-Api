@@ -14,6 +14,10 @@ namespace NotesApp.Infrastructure.Repositories
             _context = context;
         }
 
+        public async Task<User> GetUserByIdAsync(int id)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        }
 
         public async Task<User> GetUserByEmailAsync(string email)
         {
