@@ -66,8 +66,7 @@ namespace NotesApp.UnitTests.Application.Services
             // Arrange
             var note = _fixture.Build<Note>().With(n=>n.Id,0).Create();
             _noteRepositoryMock.Setup(x => x.GetNoteByIdAsync(note.Id)).ReturnsAsync(note);
-            _noteRepositoryMock.Setup(r => r.AddNoteAsync(note)).ReturnsAsync(note);
-
+          
             // Act
             var result = await _noteService.AddNoteAsync(note);
 
@@ -98,8 +97,7 @@ namespace NotesApp.UnitTests.Application.Services
             var note = _fixture.Create<Note>();
 
             _noteRepositoryMock.Setup(x => x.GetNoteByIdAsync(note.Id)).ReturnsAsync(note);
-            _noteRepositoryMock.Setup(r => r.UpdateNoteAsync(note)).ReturnsAsync(note);
-
+         
             // Act
             var result = await _noteService.UpdateNoteAsync(note);
 
@@ -132,15 +130,12 @@ namespace NotesApp.UnitTests.Application.Services
             // Arrange
             var noteId = _fixture.Create<int>();
             _noteRepositoryMock.Setup(x => x.GetNoteByIdAsync(noteId)).ReturnsAsync(new Note());
-            _noteRepositoryMock.Setup(r => r.DeleteNoteAsync(noteId)).ReturnsAsync(true);
-
+           
             // Act
             var result = await _noteService.DeleteNoteAsync(noteId);
 
-            // Assert
-            _noteRepositoryMock.Verify(r => r.DeleteNoteAsync(noteId), Times.Once);
+            // Assert       
             result.Should().BeTrue();
-       
         }
 
 

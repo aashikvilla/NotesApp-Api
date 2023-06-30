@@ -6,8 +6,8 @@ namespace NotesApp.Domain.RepositoryInterfaces
     {
         Task<IEnumerable<Note>> GetNotesForUserAsync(int userId);
         Task<Note> GetNoteByIdAsync(int noteId);
-        Task<Note> AddNoteAsync(Note note);
-        Task<Note> UpdateNoteAsync(Note note);
-        Task<bool> DeleteNoteAsync(int noteId);
+        Task AddNoteAsync(Note note);
+        Task UpdateNoteAsync(Note note);
+        Task DeleteNoteAsync(Note note);
     }
 }

@@ -1,7 +1,6 @@
 ﻿using NotesApp.Application.Common;
 using NotesApp.Domain.Entities;
 using NotesApp.Domain.RepositoryInterfaces;
-using NotesApp.Infrastructure.Repositories;
 
 namespace NotesApp.Application.Services.Notes
 {
@@ -35,8 +34,8 @@ namespace NotesApp.Application.Services.Notes
             {
                 throw new InvalidOperationException(ResponseMessages.NoteAlreadyExists);
             }
-
-            return await _noteRepository.AddNoteAsync(note);
+            await _noteRepository.AddNoteAsync(note);
+            return note;
         }
 
         public async Task<Note> UpdateNoteAsync(Note note)
@@ -47,8 +46,9 @@ namespace NotesApp.Application.Services.Notes
             {
                 throw new InvalidOperationException(ResponseMessages.NoteNotFound);
             }
+            await _noteRepository.UpdateNoteAsync(note);
 
-            return await _noteRepository.UpdateNoteAsync(note);
+            return note;
         }
 
         public async Task<bool> DeleteNoteAsync(int noteId)
@@ -59,12 +59,8 @@ namespace NotesApp.Application.Services.Notes
             {
                 throw new InvalidOperationException(ResponseMessages.NoteNotFound);
             }
-
-            return await _noteRepository.DeleteNoteAsync(noteId);
+            await _noteRepository.DeleteNoteAsync(note);
+            return true;
         }
-
-
-
-
     }
 }

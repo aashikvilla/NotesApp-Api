@@ -1,8 +1,6 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NotesApp.Application.Services.Notes;
-using NotesApp.Application.Services.Users;
 using NotesApp.Domain.Entities;
 
 namespace NotesApp.Api.Controllers
