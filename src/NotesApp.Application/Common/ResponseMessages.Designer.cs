@@ -79,11 +79,29 @@ namespace NotesApp.Application.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid NoteId.
+        /// </summary>
+        public static string InvalidNoteId {
+            get {
+                return ResourceManager.GetString("InvalidNoteId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid Password..
         /// </summary>
         public static string InvalidPassword {
             get {
                 return ResourceManager.GetString("InvalidPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid UserId.
+        /// </summary>
+        public static string InvalidUserId {
+            get {
+                return ResourceManager.GetString("InvalidUserId", resourceCulture);
             }
         }
         

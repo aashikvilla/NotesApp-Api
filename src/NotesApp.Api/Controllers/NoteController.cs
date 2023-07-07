@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NotesApp.Application.Common;
 using NotesApp.Application.Services.Notes;
 using NotesApp.Domain.Entities;
 
@@ -21,6 +22,10 @@ namespace NotesApp.Api.Controllers
         [HttpGet("GetNotesForUser/{userId}")]
         public async Task<IActionResult> GetNotesForUserAsync(int userId)
         {
+            if(userId <= 0) 
+            {
+                return BadRequest(ResponseMessages.InvalidUserId); 
+            }
             var notes= await _noteService.GetNotesForUserAsync(userId);
             return Ok(notes);
         }
@@ -42,6 +47,10 @@ namespace NotesApp.Api.Controllers
         [HttpDelete("DeleteNote/{noteId}")]
         public async Task<IActionResult> DeleteNoteAsync(int noteId)
         {
+            if (noteId <= 0)
+            {
+                return BadRequest(ResponseMessages.InvalidNoteId);
+            }
             await _noteService.DeleteNoteAsync(noteId);
             return Ok();
         }

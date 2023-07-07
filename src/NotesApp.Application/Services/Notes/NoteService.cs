@@ -51,7 +51,7 @@ namespace NotesApp.Application.Services.Notes
             return note;
         }
 
-        public async Task<bool> DeleteNoteAsync(int noteId)
+        public async Task DeleteNoteAsync(int noteId)
         {
             var note = await _noteRepository.GetNoteByIdAsync(noteId);
 
@@ -59,8 +59,7 @@ namespace NotesApp.Application.Services.Notes
             {
                 throw new InvalidOperationException(ResponseMessages.NoteNotFound);
             }
-            await _noteRepository.DeleteNoteAsync(note);
-            return true;
+            await _noteRepository.DeleteNoteAsync(note);           
         }
     }
 }

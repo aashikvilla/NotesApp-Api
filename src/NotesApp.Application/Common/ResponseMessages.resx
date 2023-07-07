@@ -123,8 +123,14 @@
   <data name="EmailNotFound" xml:space="preserve">
     <value>Email not found.</value>
   </data>
+  <data name="InvalidNoteId" xml:space="preserve">
+    <value>Invalid NoteId</value>
+  </data>
   <data name="InvalidPassword" xml:space="preserve">
     <value>Invalid Password.</value>
+  </data>
+  <data name="InvalidUserId" xml:space="preserve">
+    <value>Invalid UserId</value>
   </data>
   <data name="LoginSuccessful" xml:space="preserve">
     <value>Logged in successfully.</value>

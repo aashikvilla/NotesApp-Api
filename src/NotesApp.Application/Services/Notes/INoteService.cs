@@ -7,6 +7,6 @@ namespace NotesApp.Application.Services.Notes
         Task<IEnumerable<Note>> GetNotesForUserAsync(int userId);
         Task<Note> AddNoteAsync(Note note);
         Task<Note> UpdateNoteAsync(Note note);
-        Task<bool> DeleteNoteAsync(int noteId);
+        Task DeleteNoteAsync(int noteId);
     }
 }

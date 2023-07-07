@@ -125,17 +125,17 @@ namespace NotesApp.UnitTests.Application.Services
         }
 
         [Fact]
-        public async Task DeleteNoteAsync_ShouldReturnTrue_WhenNoteIsDeletedSuccessfully()
-        {
+        public async Task DeleteNoteAsync_ShouldNotThrowException_WhenNoteIsDeletedSuccessfully()
+        {      
             // Arrange
             var noteId = _fixture.Create<int>();
             _noteRepositoryMock.Setup(x => x.GetNoteByIdAsync(noteId)).ReturnsAsync(new Note());
-           
-            // Act
-            var result = await _noteService.DeleteNoteAsync(noteId);
 
-            // Assert       
-            result.Should().BeTrue();
+            // Act
+            Func<Task> act = async () => {await _noteService.DeleteNoteAsync(noteId); };
+
+            // Assert
+            await act.Should().NotThrowAsync();
         }
 
 
@@ -153,7 +153,7 @@ namespace NotesApp.UnitTests.Application.Services
 
             // Assert
             await act.Should().ThrowAsync<InvalidOperationException>()
-                .WithMessage(ResponseMessages.NoteNotFound);
+                .WithMessage(ResponseMessages.NoteNotFound);           
         }
 
     }

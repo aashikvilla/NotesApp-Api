@@ -78,7 +78,7 @@ namespace NotesApp.UnitTests.Api.Controllers
             // Arrange
             var noteId = _fixture.Create<int>();
 
-            _noteServiceMock.Setup(s => s.DeleteNoteAsync(noteId)).ReturnsAsync(true);
+            _noteServiceMock.Setup(s => s.DeleteNoteAsync(noteId));
 
             // Act
             var result = await _noteController.DeleteNoteAsync(noteId);

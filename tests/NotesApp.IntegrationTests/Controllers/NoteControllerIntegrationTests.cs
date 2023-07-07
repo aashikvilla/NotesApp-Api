@@ -38,6 +38,12 @@ namespace NotesApp.IntegrationTests.Controllers
   
         }
 
+        private string GetToken()
+        {
+            var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();           
+            return _tokenService.GenerateToken(userFromSeedData);
+        }
+
         [Fact]
         public async Task GetNotesForUser_ShouldReturnUserNotes_WhenUserIsValid()
         {
@@ -52,8 +58,7 @@ namespace NotesApp.IntegrationTests.Controllers
             var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
             var userNotesFromSeedData = Utilities.GetSeedingNotes().Where(n => n.UserId == userFromSeedData.Id);
 
-            var token = _tokenService.GenerateToken(userFromSeedData);
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
             // Act
             var response = await _client.GetAsync( string.Format(UrlRouteConstants.GetNotesForUser, userFromSeedData.Id) );
@@ -71,16 +76,39 @@ namespace NotesApp.IntegrationTests.Controllers
         {
             // Arrange
             int invalidId = 0;
-            var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
-           
-            var token = _tokenService.GenerateToken(userFromSeedData);
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
             // Act
             var response = await _client.GetAsync(string.Format(UrlRouteConstants.GetNotesForUser, invalidId));
 
             // Assert
            
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            var message = await response.Content.ReadAsStringAsync();
+            message.Should().Contain(ResponseMessages.InvalidUserId);
+        }
+
+        [Fact]
+        public async Task GetNotesForUser_ShouldReturnBadRequest_WhenUserIsNotPresent()
+        {
+            // Arrange
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var scopedServices = scope.ServiceProvider;
+                var db = scopedServices.GetRequiredService<AppDbContext>();
+
+                Utilities.ReinitializeDbForTests(db);
+            }
+            var userFromSeedData = Utilities.GetSeedingUsers().LastOrDefault();
+            int invalidId = userFromSeedData.Id + 1;
+
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
+
+            // Act
+            var response = await _client.GetAsync(string.Format(UrlRouteConstants.GetNotesForUser, invalidId));
+
+            // Assert
+
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
             var message = await response.Content.ReadAsStringAsync();
             message.Should().Contain(ResponseMessages.UserNotFound);
@@ -105,10 +133,7 @@ namespace NotesApp.IntegrationTests.Controllers
             // Arrange         
             var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
             var note = _fixture.Build<Note>().With(n => n.Id, 0).With(n => n.UserId, userFromSeedData.Id).Create();
-            var userNotesFromSeedData = Utilities.GetSeedingNotes().Where(n => n.UserId == userFromSeedData.Id);
-
-            var token = _tokenService.GenerateToken(userFromSeedData);
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
             // Act
             var response = await _client.PostAsJsonAsync(UrlRouteConstants.AddNote, note);
@@ -124,11 +149,9 @@ namespace NotesApp.IntegrationTests.Controllers
         [Fact]
         public async Task AddNote_ShouldReturnBadRequest_WhenNoteIsInvalid()
         {
-            // Arrange
-            var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
+            // Arrange  
             var note = Utilities.GetSeedingNotes().FirstOrDefault();
-            var token = _tokenService.GenerateToken(userFromSeedData);
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
             // Act
             var response = await _client.PostAsJsonAsync(UrlRouteConstants.AddNote, note);
@@ -157,13 +180,11 @@ namespace NotesApp.IntegrationTests.Controllers
         public async Task UpdateNote_ShouldReturnNote_WhenNoteIsValid()
         {
             // Arrange         
-            var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
             var note = Utilities.GetSeedingNotes().FirstOrDefault();
             var title = _fixture.Create<string>();
             note.Title = title;
             
-            var token = _tokenService.GenerateToken(userFromSeedData);
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
             // Act
             var response = await _client.PutAsJsonAsync(UrlRouteConstants.UpdateNote, note);
@@ -180,12 +201,10 @@ namespace NotesApp.IntegrationTests.Controllers
         public async Task UpdateNote_ShouldReturnBadRequest_WhenNoteIsInvalid()
         {
             // Arrange
-            var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
             var note = Utilities.GetSeedingNotes().FirstOrDefault();
             note.Id = 0;
 
-            var token = _tokenService.GenerateToken(userFromSeedData);
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
             // Act
             var response = await _client.PutAsJsonAsync(UrlRouteConstants.UpdateNote, note);
@@ -214,11 +233,8 @@ namespace NotesApp.IntegrationTests.Controllers
         public async Task DeleteNote_ShouldReturnOk_WhenNoteIsValid()
         {
             // Arrange         
-            var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
-            var note = Utilities.GetSeedingNotes().FirstOrDefault();          
-
-            var token = _tokenService.GenerateToken(userFromSeedData);
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var note = Utilities.GetSeedingNotes().FirstOrDefault();
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
             // Act
             var response = await _client.DeleteAsync( string.Format( UrlRouteConstants.DeleteNote,note.Id) );
@@ -232,12 +248,34 @@ namespace NotesApp.IntegrationTests.Controllers
         public async Task DeleteNote_ShouldReturnBadRequest_WhenNoteIsInvalid()
         {
             // Arrange
-            var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
-            var note = Utilities.GetSeedingNotes().FirstOrDefault();
-            note.Id = 0;
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
-            var token = _tokenService.GenerateToken(userFromSeedData);
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            // Act
+            var response = await _client.DeleteAsync(string.Format(UrlRouteConstants.DeleteNote, -1));
+
+            // Assert
+
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            var message = await response.Content.ReadAsStringAsync();
+            message.Should().Contain(ResponseMessages.InvalidNoteId);
+        }
+
+        [Fact]
+        public async Task DeleteNote_ShouldReturnBadRequest_WhenNoteIsNotPresent()
+        {
+            // Arrange
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var scopedServices = scope.ServiceProvider;
+                var db = scopedServices.GetRequiredService<AppDbContext>();
+
+                Utilities.ReinitializeDbForTests(db);
+            }
+            var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
+            var note = Utilities.GetSeedingNotes().LastOrDefault();
+            note.Id = note.Id + 1;
+
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
             // Act
             var response = await _client.DeleteAsync(string.Format(UrlRouteConstants.DeleteNote, note.Id));
