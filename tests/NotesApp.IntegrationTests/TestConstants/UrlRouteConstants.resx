@@ -117,34 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="EmailAlreadyExists" xml:space="preserve">
-    <value>Email already exists.</value>
+  <data name="AddNote" xml:space="preserve">
+    <value>/api/Note/AddNote</value>
   </data>
-  <data name="EmailNotFound" xml:space="preserve">
-    <value>Email not found.</value>
+  <data name="DeleteNote" xml:space="preserve">
+    <value>/api/Note/DeleteNote/{0}</value>
   </data>
-  <data name="InvalidNoteId" xml:space="preserve">
-    <value>Invalid NoteId</value>
+  <data name="GetNotesForUser" xml:space="preserve">
+    <value>/api/Note/GetNotesForUser/{0}</value>
   </data>
-  <data name="InvalidPassword" xml:space="preserve">
-    <value>Invalid Password.</value>
+  <data name="Login" xml:space="preserve">
+    <value>/api/User/login</value>
   </data>
-  <data name="InvalidUserId" xml:space="preserve">
-    <value>Invalid UserId</value>
+  <data name="Register" xml:space="preserve">
+    <value>/api/User/register</value>
   </data>
-  <data name="LoginSuccessful" xml:space="preserve">
-    <value>Logged in successfully.</value>
-  </data>
-  <data name="NoteAlreadyExists" xml:space="preserve">
-    <value>Note already exists.</value>
-  </data>
-  <data name="NoteNotFound" xml:space="preserve">
-    <value>Note not found.</value>
-  </data>
-  <data name="RegistrationSuccessful" xml:space="preserve">
-    <value>User registered successfully.</value>
-  </data>
-  <data name="UserNotFound" xml:space="preserve">
-    <value>User not found.</value>
+  <data name="UpdateNote" xml:space="preserve">
+    <value>/api/Note/UpdateNote</value>
   </data>
 </root>

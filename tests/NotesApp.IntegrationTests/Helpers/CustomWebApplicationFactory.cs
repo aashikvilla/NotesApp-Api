@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +12,6 @@ namespace NotesApp.IntegrationTests.Helpers
 {
     public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
     {
-        private readonly ILogger<ExceptionMiddleware> _logger;
         public IConfiguration Configuration { get; private set; }
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -50,6 +50,9 @@ namespace NotesApp.IntegrationTests.Helpers
                 var scopedServices = scope.ServiceProvider;
                 var db = scopedServices.GetRequiredService<AppDbContext>();
 
+               
+
+
                 // Ensure the database is created.
                 db.Database.EnsureCreated();
 
@@ -59,7 +62,8 @@ namespace NotesApp.IntegrationTests.Helpers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Error occured while seeding data for Test Db: {ex}");
+                    var logger = scopedServices.GetRequiredService<ILogger<ExceptionMiddleware>>();
+                    logger.LogError($"Error occured while seeding data for Test Db: {ex}");
                 }
             });
 

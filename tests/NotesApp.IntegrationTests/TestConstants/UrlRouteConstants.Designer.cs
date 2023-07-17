@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NotesApp.Application.Common {
+namespace NotesApp.IntegrationTests.TestConstants {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace NotesApp.Application.Common {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class ResponseMessages {
+    public class UrlRouteConstants {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal ResponseMessages() {
+        internal UrlRouteConstants() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace NotesApp.Application.Common {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NotesApp.Application.Common.ResponseMessages", typeof(ResponseMessages).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NotesApp.IntegrationTests.TestConstants.UrlRouteConstants", typeof(UrlRouteConstants).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,92 +61,56 @@ namespace NotesApp.Application.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Email already exists..
+        ///   Looks up a localized string similar to /api/Note/AddNote.
         /// </summary>
-        public static string EmailAlreadyExists {
+        public static string AddNote {
             get {
-                return ResourceManager.GetString("EmailAlreadyExists", resourceCulture);
+                return ResourceManager.GetString("AddNote", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Email not found..
+        ///   Looks up a localized string similar to /api/Note/DeleteNote/{0}.
         /// </summary>
-        public static string EmailNotFound {
+        public static string DeleteNote {
             get {
-                return ResourceManager.GetString("EmailNotFound", resourceCulture);
+                return ResourceManager.GetString("DeleteNote", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid NoteId.
+        ///   Looks up a localized string similar to /api/Note/GetNotesForUser/{0}.
         /// </summary>
-        public static string InvalidNoteId {
+        public static string GetNotesForUser {
             get {
-                return ResourceManager.GetString("InvalidNoteId", resourceCulture);
+                return ResourceManager.GetString("GetNotesForUser", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid Password..
+        ///   Looks up a localized string similar to /api/User/login.
         /// </summary>
-        public static string InvalidPassword {
+        public static string Login {
             get {
-                return ResourceManager.GetString("InvalidPassword", resourceCulture);
+                return ResourceManager.GetString("Login", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid UserId.
+        ///   Looks up a localized string similar to /api/User/register.
         /// </summary>
-        public static string InvalidUserId {
+        public static string Register {
             get {
-                return ResourceManager.GetString("InvalidUserId", resourceCulture);
+                return ResourceManager.GetString("Register", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Logged in successfully..
+        ///   Looks up a localized string similar to /api/Note/UpdateNote.
         /// </summary>
-        public static string LoginSuccessful {
+        public static string UpdateNote {
             get {
-                return ResourceManager.GetString("LoginSuccessful", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Note already exists..
-        /// </summary>
-        public static string NoteAlreadyExists {
-            get {
-                return ResourceManager.GetString("NoteAlreadyExists", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Note not found..
-        /// </summary>
-        public static string NoteNotFound {
-            get {
-                return ResourceManager.GetString("NoteNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to User registered successfully..
-        /// </summary>
-        public static string RegistrationSuccessful {
-            get {
-                return ResourceManager.GetString("RegistrationSuccessful", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to User not found..
-        /// </summary>
-        public static string UserNotFound {
-            get {
-                return ResourceManager.GetString("UserNotFound", resourceCulture);
+                return ResourceManager.GetString("UpdateNote", resourceCulture);
             }
         }
     }

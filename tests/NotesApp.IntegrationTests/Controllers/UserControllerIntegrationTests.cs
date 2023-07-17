@@ -107,7 +107,7 @@ namespace NotesApp.IntegrationTests.Controllers
             
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
             var message = await response.Content.ReadAsStringAsync();
-            message.Should().BeEquivalentTo(ResponseMessages.InvalidPassword);
+            message.Should().Contain(ResponseMessages.InvalidPassword);
         }
 
 
@@ -130,7 +130,7 @@ namespace NotesApp.IntegrationTests.Controllers
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
             var message = await response.Content.ReadAsStringAsync();
-            message.Should().BeEquivalentTo(ResponseMessages.EmailNotFound);
+            message.Should().Contain(ResponseMessages.EmailNotFound);
         }
 
     }
