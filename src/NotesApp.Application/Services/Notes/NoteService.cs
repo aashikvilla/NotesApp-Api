@@ -16,7 +16,7 @@ namespace NotesApp.Application.Services.Notes
         }
 
 
-        public async Task<IEnumerable<Note>> GetNotesForUserAsync(int userId)
+        public async Task<IEnumerable<Note>> GetNotesForUserAsync(string userId)
         {
             var user = await _userRepository.GetUserByIdAsync(userId);
 
@@ -30,7 +30,7 @@ namespace NotesApp.Application.Services.Notes
 
         public async Task<Note> AddNoteAsync(Note note)
         {
-            if (note.Id >0)
+            if (note.Id != string.Empty)
             {
                 throw new InvalidOperationException(ResponseMessages.NoteAlreadyExists);
             }
@@ -51,7 +51,7 @@ namespace NotesApp.Application.Services.Notes
             return note;
         }
 
-        public async Task DeleteNoteAsync(int noteId)
+        public async Task DeleteNoteAsync(string noteId)
         {
             var note = await _noteRepository.GetNoteByIdAsync(noteId);
 

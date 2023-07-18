@@ -1,45 +1,48 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using NotesApp.Domain.Entities;
 using NotesApp.Domain.RepositoryInterfaces;
-using NotesApp.Infrastructure.Data;
 
 namespace NotesApp.Infrastructure.Repositories
 {
     public class NoteRepository:INoteRepository
     {
-        private readonly AppDbContext _context;
+        private readonly IMongoCollection<Note> _notes;
 
-        public NoteRepository(AppDbContext context)
+        public NoteRepository(IMongoDatabase database)
         {
-            _context = context;
+            // "Notes" is the name of the collection in MongoDB
+            _notes = database.GetCollection<Note>("Notes");
         }
 
-        public async Task<IEnumerable<Note>> GetNotesForUserAsync(int userId)
+        public async Task<IEnumerable<Note>> GetNotesForUserAsync(string userId)
         {
-            return await _context.Notes.Where(n => n.UserId == userId).ToListAsync();
+            var filter = Builders<Note>.Filter.Eq(note => note.UserId, userId);
+            return await _notes.Find(filter).ToListAsync();
+
         }
 
-        public async Task<Note> GetNoteByIdAsync(int noteId)
+        public async Task<Note> GetNoteByIdAsync(string noteId)
         {
-            return await _context.Notes.AsNoTracking().FirstOrDefaultAsync(n=>n.Id == noteId);
+            var filter = Builders<Note>.Filter.Eq(note => note.Id, noteId);
+            return await _notes.Find(filter).FirstOrDefaultAsync();
         }
 
         public async Task AddNoteAsync(Note note)
         {
-            await _context.Notes.AddAsync(note);
-            await _context.SaveChangesAsync();
+            await _notes.InsertOneAsync(note);
         }
 
         public async Task UpdateNoteAsync(Note note)
         {
-            _context.Notes.Update(note);
-            await _context.SaveChangesAsync();
+            var filter = Builders<Note>.Filter.Eq(n => n.Id, note.Id);
+            await _notes.ReplaceOneAsync(filter, note);
         }
 
         public async Task DeleteNoteAsync(Note note)
         {
-            _context.Notes.Remove(note);
-            await _context.SaveChangesAsync();           
+            var filter = Builders<Note>.Filter.Eq(n => n.Id, note.Id);
+            await _notes.DeleteOneAsync(filter);
         }
     }
 }

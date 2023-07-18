@@ -57,7 +57,7 @@ namespace NotesApp.IntegrationTests.Helpers
             return new List<User>()
             {
                 new User(){
-                    Id = 1,
+                    Id = "1",
                     FirstName="Aashik",
                     LastName="Villa",
                     Email = validUserLogin.Email,
@@ -72,21 +72,21 @@ namespace NotesApp.IntegrationTests.Helpers
             {
                 new Note()
                 {
-                    Id = 1,
+                    Id = "1",
                     Title = "Travel Plans",
                     Description = "note desc",
                     Priority = "LOW",
                     Status = "NOT STARTED",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Note()
                 {
-                    Id = 2,
+                    Id = "2",
                     Title = "Dinner Plan",
                     Description = "Reserve a table",
                     Priority = "HIGH",
                     Status = "COMPLETED",
-                    UserId = 1
+                    UserId = "1"
                 }
             };
         }

@@ -1,34 +1,34 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using NotesApp.Domain.Entities;
 using NotesApp.Domain.RepositoryInterfaces;
-using NotesApp.Infrastructure.Data;
-
 namespace NotesApp.Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly AppDbContext _context;
+        private readonly IMongoCollection<User> _users;
 
-        public UserRepository(AppDbContext context)
+        public UserRepository(IMongoDatabase database)
         {
-            _context = context;
+            // "Users" is the name of the collection in MongoDB
+            _users = database.GetCollection<User>("Users");
         }
 
-        public async Task<User> GetUserByIdAsync(int id)
+        public async Task<User> GetUserByIdAsync(string id)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            var filter = Builders<User>.Filter.Eq(user => user.Id, id);
+            return await _users.Find(filter).FirstOrDefaultAsync();
         }
 
         public async Task<User> GetUserByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var filter = Builders<User>.Filter.Eq(user => user.Email, email);
+            return await _users.Find(filter).FirstOrDefaultAsync();
         }
 
         public async Task AddUserAsync(User user)
         {
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            await _users.InsertOneAsync(user);
         }
     }
-
 }

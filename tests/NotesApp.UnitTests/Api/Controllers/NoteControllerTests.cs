@@ -26,7 +26,7 @@ namespace NotesApp.UnitTests.Api.Controllers
         public async Task GetNotesForUser_ShouldReturnNotes_WhenUserExists()
         {
             // Arrange
-            var userId = _fixture.Create<int>();
+            var userId = _fixture.Create<string>();
             var notes = _fixture.CreateMany<Note>(5);
 
             _noteServiceMock.Setup(s => s.GetNotesForUserAsync(userId)).ReturnsAsync(notes);
@@ -76,7 +76,7 @@ namespace NotesApp.UnitTests.Api.Controllers
         public async Task DeleteNote_ShouldReturnOk_WhenDeletionIsSuccessful()
         {
             // Arrange
-            var noteId = _fixture.Create<int>();
+            var noteId = _fixture.Create<string>();
 
             _noteServiceMock.Setup(s => s.DeleteNoteAsync(noteId));
 

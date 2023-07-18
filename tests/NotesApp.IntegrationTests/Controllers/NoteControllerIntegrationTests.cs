@@ -100,7 +100,7 @@ namespace NotesApp.IntegrationTests.Controllers
                 Utilities.ReinitializeDbForTests(db);
             }
             var userFromSeedData = Utilities.GetSeedingUsers().LastOrDefault();
-            int invalidId = userFromSeedData.Id + 1;
+            string invalidId = userFromSeedData.Id + "1";
 
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
@@ -132,7 +132,7 @@ namespace NotesApp.IntegrationTests.Controllers
         {
             // Arrange         
             var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
-            var note = _fixture.Build<Note>().With(n => n.Id, 0).With(n => n.UserId, userFromSeedData.Id).Create();
+            var note = _fixture.Build<Note>().With(n => n.Id, "").With(n => n.UserId, userFromSeedData.Id).Create();
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
             // Act
@@ -143,7 +143,7 @@ namespace NotesApp.IntegrationTests.Controllers
             var addedNote = await response.Content.ReadFromJsonAsync<Note>();
 
             //check if id is auto generated
-            addedNote.Id.Should().BeGreaterThan(0);
+            addedNote.Id.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -202,7 +202,7 @@ namespace NotesApp.IntegrationTests.Controllers
         {
             // Arrange
             var note = Utilities.GetSeedingNotes().FirstOrDefault();
-            note.Id = 0;
+            note.Id = "";
 
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 

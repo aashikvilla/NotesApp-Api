@@ -9,14 +9,22 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using NotesApp.Application.Services.Notes;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var mongoDbSettings = builder.Configuration.GetSection("MongoDbSettings");
+var connectionString = mongoDbSettings.GetSection("ConnectionString").Value;
+var databaseName = mongoDbSettings.GetSection("DatabaseName").Value;
+var mongoClient = new MongoClient(connectionString);
+var database = mongoClient.GetDatabase(databaseName);
+
+builder.Services.AddSingleton(mongoClient);
+builder.Services.AddSingleton<IMongoDatabase>(sp => sp.GetRequiredService<MongoClient>().GetDatabase(databaseName));
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();

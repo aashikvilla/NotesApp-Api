@@ -20,9 +20,9 @@ namespace NotesApp.Api.Controllers
         }
 
         [HttpGet("GetNotesForUser/{userId}")]
-        public async Task<IActionResult> GetNotesForUserAsync(int userId)
+        public async Task<IActionResult> GetNotesForUserAsync(string userId)
         {
-            if(userId <= 0) 
+            if(userId == string.Empty) 
             {
                 return BadRequest(ResponseMessages.InvalidUserId); 
             }
@@ -45,9 +45,9 @@ namespace NotesApp.Api.Controllers
         }
 
         [HttpDelete("DeleteNote/{noteId}")]
-        public async Task<IActionResult> DeleteNoteAsync(int noteId)
+        public async Task<IActionResult> DeleteNoteAsync(string noteId)
         {
-            if (noteId <= 0)
+            if (noteId == string.Empty)
             {
                 return BadRequest(ResponseMessages.InvalidNoteId);
             }
