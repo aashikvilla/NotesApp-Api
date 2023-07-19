@@ -3,6 +3,8 @@ using NotesApp.Application.Dto;
 using NotesApp.Infrastructure.Services;
 using MongoDB.Driver;
 using Microsoft.Extensions.DependencyInjection;
+using NotesApp.Infrastructure.Data;
+using Microsoft.Extensions.Configuration;
 
 namespace NotesApp.IntegrationTests.Helpers
 {
@@ -14,22 +16,15 @@ namespace NotesApp.IntegrationTests.Helpers
             Password = "TestPassword123!"
         };
 
-        public static void InitializeDbForTests(IMongoDatabase db)
-        {
-            var users = db.GetCollection<User>("Users");
+
+        public static void ReinitializeDbForTests(IMongoDatabase db, MongoDbSettings mongoDbSettings)
+        {          
+            db.DropCollection(mongoDbSettings.UsersCollectionName);
+            var users = db.GetCollection<User>(mongoDbSettings.UsersCollectionName);
             users.InsertMany(GetSeedingUsers());
-
-            var notes = db.GetCollection<Note>("Notes");
-            notes.InsertMany(GetSeedingNotes());
-        }
-
-
-        public static void ReinitializeDbForTests(IMongoDatabase db)
-        {
-            // Drop the database at the beginning of every test run
-            db.DropCollection("Users");
-            db.DropCollection("Notes");
-            InitializeDbForTests(db);
+            db.DropCollection(mongoDbSettings.NotesCollectionName);
+            var notes = db.GetCollection<Note>(mongoDbSettings.NotesCollectionName);
+            notes.InsertMany(GetSeedingNotes());          
         }
 
         public static List<User> GetSeedingUsers()
@@ -80,7 +75,11 @@ namespace NotesApp.IntegrationTests.Helpers
             {
                 var scopedServices = scope.ServiceProvider;
                 var db = scopedServices.GetRequiredService<IMongoDatabase>();
-                Utilities.ReinitializeDbForTests(db);
+
+                var configuration = scopedServices.GetRequiredService<IConfiguration>();
+                var mongoDbSettings = configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>();
+
+                Utilities.ReinitializeDbForTests(db, mongoDbSettings);
             }
         }
 

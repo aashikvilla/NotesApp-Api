@@ -224,7 +224,8 @@ namespace NotesApp.IntegrationTests.Controllers
         [Fact]
         public async Task DeleteNote_ShouldReturnOk_WhenNoteIsValid()
         {
-            // Arrange         
+            // Arrange
+            Utilities.ReinitializeDb(_factory);
             var note = Utilities.GetSeedingNotes().FirstOrDefault();
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 

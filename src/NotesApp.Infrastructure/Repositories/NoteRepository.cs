@@ -1,18 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using NotesApp.Domain.Entities;
 using NotesApp.Domain.RepositoryInterfaces;
+using NotesApp.Infrastructure.Data;
 
 namespace NotesApp.Infrastructure.Repositories
 {
     public class NoteRepository:INoteRepository
     {
         private readonly IMongoCollection<Note> _notes;
-
-        public NoteRepository(IMongoDatabase database)
+        public NoteRepository(IMongoDatabase mongoDatabase, IOptions<MongoDbSettings> mongoDbSettings)
         {
-            // "Notes" is the name of the collection in MongoDB
-            _notes = database.GetCollection<Note>("Notes");
+            _notes = mongoDatabase.GetCollection<Note>(
+                mongoDbSettings.Value.NotesCollectionName);
         }
 
         public async Task<IEnumerable<Note>> GetNotesForUserAsync(string userId)

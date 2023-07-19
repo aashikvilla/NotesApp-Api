@@ -1,16 +1,19 @@
-﻿using MongoDB.Driver;
+﻿using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using NotesApp.Domain.Entities;
 using NotesApp.Domain.RepositoryInterfaces;
+using NotesApp.Infrastructure.Data;
+
 namespace NotesApp.Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
         private readonly IMongoCollection<User> _users;
 
-        public UserRepository(IMongoDatabase database)
+        public UserRepository(IMongoDatabase mongoDatabase, IOptions<MongoDbSettings> mongoDbSettings)
         {
-            // "Users" is the name of the collection in MongoDB
-            _users = database.GetCollection<User>("Users");
+            _users = mongoDatabase.GetCollection<User>(
+                mongoDbSettings.Value.UsersCollectionName);
         }
 
         public async Task<User> GetUserByIdAsync(string id)

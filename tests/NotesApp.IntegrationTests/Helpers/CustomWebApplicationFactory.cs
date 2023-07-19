@@ -27,21 +27,19 @@ namespace NotesApp.IntegrationTests.Helpers
 
             builder.ConfigureServices(services =>
             {
-                var mongoDbSettings = Configuration.GetSection("MongoDbSettings");
-                var connectionString = mongoDbSettings.GetSection("ConnectionString").Value;
-                var databaseName = mongoDbSettings.GetSection("DatabaseName").Value;
+                var mongoDbSettings = Configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>();
 
-                services.AddSingleton<IMongoClient, MongoClient>(sp =>
+                // Setup MongoClient
+                services.AddSingleton<IMongoClient, MongoClient>(_ =>
                 {
-                    var settings = MongoClientSettings.FromUrl(new MongoUrl(connectionString));
-                    return new MongoClient(settings);
+                    return new MongoClient(mongoDbSettings?.ConnectionString);
                 });
 
-                services.AddScoped(sp =>
+                // Setup MongoDatabase
+                services.AddSingleton<IMongoDatabase>(sp =>
                 {
-                    var client = sp.GetRequiredService<IMongoClient>();
-                    var database = client.GetDatabase(databaseName); // use a test database for integration tests
-                    return database;
+                    var mongoClient = sp.GetRequiredService<IMongoClient>();
+                    return mongoClient.GetDatabase(mongoDbSettings.DatabaseName); // use a test database for integration tests
                 });
 
                 // Build the service provider.
@@ -56,7 +54,7 @@ namespace NotesApp.IntegrationTests.Helpers
 
                 try
                 {
-                    Utilities.ReinitializeDbForTests(db);
+                    Utilities.ReinitializeDbForTests(db, mongoDbSettings);
                 }
                 catch (Exception ex)
                 {

@@ -51,7 +51,7 @@ namespace NotesApp.IntegrationTests.Controllers
         public async Task RegisterAsync_ShouldReturnFailure_WhenEmailAlreadyExists()
         {
             // Arrange
-            //Utilities.ReinitializeDb(_factory);
+            Utilities.ReinitializeDb(_factory);
             var userRegisterDto = _fixture.Build<UserRegisterDto>()
                 .With(x => x.Email, Utilities.validUserLogin.Email)
                 .Create();
@@ -95,6 +95,7 @@ namespace NotesApp.IntegrationTests.Controllers
         public async Task LoginAsync_ShouldReturnFailure_WhenPasswordIsIncorrect()
         {
             // Arrange
+            Utilities.ReinitializeDb(_factory);
             var userLoginDto = new UserLoginDto
             {
                 Email = Utilities.validUserLogin.Email,

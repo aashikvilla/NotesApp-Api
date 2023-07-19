@@ -7,20 +7,27 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using NotesApp.Application.Services.Notes;
+using NotesApp.Infrastructure.Data;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
-//Mongo Db setup
-var mongoDbSettings = builder.Configuration.GetSection("MongoDbSettings");
-var connectionString = mongoDbSettings.GetSection("ConnectionString").Value;
-var databaseName = mongoDbSettings.GetSection("DatabaseName").Value;
-var mongoClient = new MongoClient(connectionString);
-var database = mongoClient.GetDatabase(databaseName);
-
-builder.Services.AddSingleton(mongoClient);
-builder.Services.AddSingleton<IMongoDatabase>(sp => sp.GetRequiredService<MongoClient>().GetDatabase(databaseName));
 
 // Add services to the container.
+
+//Mongo Db setup
+builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
+
+MongoDbSettings mongoDbSettings = builder.Configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>();
+builder.Services.AddSingleton<IMongoClient, MongoClient>(_ =>
+{
+    return new MongoClient(mongoDbSettings?.ConnectionString);
+});
+builder.Services.AddSingleton<IMongoDatabase>(sp =>
+{
+    var mongoClient = sp.GetRequiredService<MongoClient>();
+    return mongoClient.GetDatabase(mongoDbSettings.DatabaseName);
+});
+
 
 builder.Services.AddControllers();
 
