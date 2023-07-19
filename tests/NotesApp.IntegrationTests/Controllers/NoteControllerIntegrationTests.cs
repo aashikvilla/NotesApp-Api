@@ -7,10 +7,11 @@ using System.Net;
 using FluentAssertions;
 using NotesApp.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
-using NotesApp.Infrastructure.Data;
 using NotesApp.Application.Common;
 using System.Net.Http.Headers;
 using NotesApp.Infrastructure.Services;
+using MongoDB.Driver;
+using MongoDB.Bson;
 
 namespace NotesApp.IntegrationTests.Controllers
 {
@@ -43,18 +44,13 @@ namespace NotesApp.IntegrationTests.Controllers
             var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();           
             return _tokenService.GenerateToken(userFromSeedData);
         }
+           
 
         [Fact]
         public async Task GetNotesForUser_ShouldReturnUserNotes_WhenUserIsValid()
         {
             // Arrange
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var scopedServices = scope.ServiceProvider;
-                var db = scopedServices.GetRequiredService<AppDbContext>();
-
-                Utilities.ReinitializeDbForTests(db);
-            }
+            Utilities.ReinitializeDb(_factory);
             var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
             var userNotesFromSeedData = Utilities.GetSeedingNotes().Where(n => n.UserId == userFromSeedData.Id);
 
@@ -92,15 +88,9 @@ namespace NotesApp.IntegrationTests.Controllers
         public async Task GetNotesForUser_ShouldReturnBadRequest_WhenUserIsNotPresent()
         {
             // Arrange
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var scopedServices = scope.ServiceProvider;
-                var db = scopedServices.GetRequiredService<AppDbContext>();
-
-                Utilities.ReinitializeDbForTests(db);
-            }
-            var userFromSeedData = Utilities.GetSeedingUsers().LastOrDefault();
-            string invalidId = userFromSeedData.Id + "1";
+            Utilities.ReinitializeDb(_factory);
+            
+            string invalidId = ObjectId.GenerateNewId().ToString();
 
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
@@ -179,7 +169,8 @@ namespace NotesApp.IntegrationTests.Controllers
         [Fact]
         public async Task UpdateNote_ShouldReturnNote_WhenNoteIsValid()
         {
-            // Arrange         
+            // Arrange
+            Utilities.ReinitializeDb(_factory);
             var note = Utilities.GetSeedingNotes().FirstOrDefault();
             var title = _fixture.Create<string>();
             note.Title = title;
@@ -202,7 +193,8 @@ namespace NotesApp.IntegrationTests.Controllers
         {
             // Arrange
             var note = Utilities.GetSeedingNotes().FirstOrDefault();
-            note.Id = "";
+            note.Id = ObjectId.GenerateNewId().ToString();
+
 
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
@@ -249,9 +241,10 @@ namespace NotesApp.IntegrationTests.Controllers
         {
             // Arrange
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
+            var invalidId = _fixture.Create<string>();
 
             // Act
-            var response = await _client.DeleteAsync(string.Format(UrlRouteConstants.DeleteNote, -1));
+            var response = await _client.DeleteAsync(string.Format(UrlRouteConstants.DeleteNote, invalidId));
 
             // Assert
 
@@ -264,21 +257,13 @@ namespace NotesApp.IntegrationTests.Controllers
         public async Task DeleteNote_ShouldReturnBadRequest_WhenNoteIsNotPresent()
         {
             // Arrange
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var scopedServices = scope.ServiceProvider;
-                var db = scopedServices.GetRequiredService<AppDbContext>();
-
-                Utilities.ReinitializeDbForTests(db);
-            }
-            var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
-            var note = Utilities.GetSeedingNotes().LastOrDefault();
-            note.Id = note.Id + 1;
+            Utilities.ReinitializeDb(_factory);                  
+            string noteId = ObjectId.GenerateNewId().ToString();         
 
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
             // Act
-            var response = await _client.DeleteAsync(string.Format(UrlRouteConstants.DeleteNote, note.Id));
+            var response = await _client.DeleteAsync(string.Format(UrlRouteConstants.DeleteNote, noteId));
 
             // Assert
 

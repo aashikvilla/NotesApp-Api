@@ -51,6 +51,7 @@ namespace NotesApp.IntegrationTests.Controllers
         public async Task RegisterAsync_ShouldReturnFailure_WhenEmailAlreadyExists()
         {
             // Arrange
+            //Utilities.ReinitializeDb(_factory);
             var userRegisterDto = _fixture.Build<UserRegisterDto>()
                 .With(x => x.Email, Utilities.validUserLogin.Email)
                 .Create();
@@ -115,13 +116,7 @@ namespace NotesApp.IntegrationTests.Controllers
         public async Task LoginAsync_ShouldReturnFailure_WhenUserDoesNotExist()
         {
             // Arrange
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var scopedServices = scope.ServiceProvider;
-                var db = scopedServices.GetRequiredService<AppDbContext>();
-
-                Utilities.ReinitializeDbForTests(db);
-            }
+            Utilities.ReinitializeDb(_factory);
             var userLoginDto = _fixture.Create<UserLoginDto>();               
 
             // Act

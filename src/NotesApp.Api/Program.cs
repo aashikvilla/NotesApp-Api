@@ -1,8 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using NotesApp.Api.Middlewares;
 using NotesApp.Application.Services.Users;
 using NotesApp.Domain.RepositoryInterfaces;
-using NotesApp.Infrastructure.Data;
 using NotesApp.Infrastructure.Repositories;
 using NotesApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,7 +10,7 @@ using NotesApp.Application.Services.Notes;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
-//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+//Mongo Db setup
 var mongoDbSettings = builder.Configuration.GetSection("MongoDbSettings");
 var connectionString = mongoDbSettings.GetSection("ConnectionString").Value;
 var databaseName = mongoDbSettings.GetSection("DatabaseName").Value;

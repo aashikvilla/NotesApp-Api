@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using NotesApp.Api.Middlewares;
 using NotesApp.Infrastructure.Data;
 
@@ -26,19 +27,21 @@ namespace NotesApp.IntegrationTests.Helpers
 
             builder.ConfigureServices(services =>
             {
-                var descriptor = services.SingleOrDefault(
-                    d => d.ServiceType ==
-                        typeof(DbContextOptions<AppDbContext>));
+                var mongoDbSettings = Configuration.GetSection("MongoDbSettings");
+                var connectionString = mongoDbSettings.GetSection("ConnectionString").Value;
+                var databaseName = mongoDbSettings.GetSection("DatabaseName").Value;
 
-                if (descriptor != null)
+                services.AddSingleton<IMongoClient, MongoClient>(sp =>
                 {
-                    services.Remove(descriptor);
-                }
+                    var settings = MongoClientSettings.FromUrl(new MongoUrl(connectionString));
+                    return new MongoClient(settings);
+                });
 
-                // Use SQL Server for the tests and get connection string from appsettings.test.json
-                services.AddDbContext<AppDbContext>(options =>
+                services.AddScoped(sp =>
                 {
-                    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                    var client = sp.GetRequiredService<IMongoClient>();
+                    var database = client.GetDatabase(databaseName); // use a test database for integration tests
+                    return database;
                 });
 
                 // Build the service provider.
@@ -48,13 +51,8 @@ namespace NotesApp.IntegrationTests.Helpers
                 // context (AppDbContext).
                 using var scope = sp.CreateScope();
                 var scopedServices = scope.ServiceProvider;
-                var db = scopedServices.GetRequiredService<AppDbContext>();
+                var db = scopedServices.GetRequiredService<IMongoDatabase>();
 
-               
-
-
-                // Ensure the database is created.
-                db.Database.EnsureCreated();
 
                 try
                 {

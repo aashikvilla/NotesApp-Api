@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using Moq;
 using NotesApp.Api.Controllers;
 using NotesApp.Application.Services.Notes;
@@ -26,7 +27,7 @@ namespace NotesApp.UnitTests.Api.Controllers
         public async Task GetNotesForUser_ShouldReturnNotes_WhenUserExists()
         {
             // Arrange
-            var userId = _fixture.Create<string>();
+            var userId =ObjectId.GenerateNewId().ToString();
             var notes = _fixture.CreateMany<Note>(5);
 
             _noteServiceMock.Setup(s => s.GetNotesForUserAsync(userId)).ReturnsAsync(notes);
@@ -75,8 +76,8 @@ namespace NotesApp.UnitTests.Api.Controllers
         [Fact]
         public async Task DeleteNote_ShouldReturnOk_WhenDeletionIsSuccessful()
         {
-            // Arrange
-            var noteId = _fixture.Create<string>();
+            // Arrange     
+            var noteId = ObjectId.GenerateNewId().ToString();
 
             _noteServiceMock.Setup(s => s.DeleteNoteAsync(noteId));
 

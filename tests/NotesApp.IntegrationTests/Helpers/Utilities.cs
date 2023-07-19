@@ -1,8 +1,8 @@
 ﻿using NotesApp.Domain.Entities;
-using NotesApp.Infrastructure.Data;
 using NotesApp.Application.Dto;
 using NotesApp.Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace NotesApp.IntegrationTests.Helpers
 {
@@ -14,40 +14,21 @@ namespace NotesApp.IntegrationTests.Helpers
             Password = "TestPassword123!"
         };
 
-        public static void InitializeDbForTests(AppDbContext db)
+        public static void InitializeDbForTests(IMongoDatabase db)
         {
-            using (var transaction = db.Database.BeginTransaction())
-            {
-                // Turn identity insert ON for Users
-                db.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Users ON;");
+            var users = db.GetCollection<User>("Users");
+            users.InsertMany(GetSeedingUsers());
 
-                // Add users 
-                db.Users.AddRange(GetSeedingUsers());
-                db.SaveChanges();
-
-                // Turn identity insert OFF for Users
-                db.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Users OFF;");
-
-
-                // Turn identity insert ON for Notes
-                db.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Notes ON;");
-
-                // Add users 
-                db.Notes.AddRange(GetSeedingNotes());
-                db.SaveChanges();
-
-                // Turn identity insert OFF for Notes
-                db.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Notes OFF;");
-
-                transaction.Commit();
-            }
+            var notes = db.GetCollection<Note>("Notes");
+            notes.InsertMany(GetSeedingNotes());
         }
 
 
-        public static void ReinitializeDbForTests(AppDbContext db)
+        public static void ReinitializeDbForTests(IMongoDatabase db)
         {
-            db.Users.RemoveRange(db.Users);
-            db.Notes.RemoveRange(db.Notes);
+            // Drop the database at the beginning of every test run
+            db.DropCollection("Users");
+            db.DropCollection("Notes");
             InitializeDbForTests(db);
         }
 
@@ -57,7 +38,7 @@ namespace NotesApp.IntegrationTests.Helpers
             return new List<User>()
             {
                 new User(){
-                    Id = "1",
+                    Id = "64b6f787ff6d89b317265d22",
                     FirstName="Aashik",
                     LastName="Villa",
                     Email = validUserLogin.Email,
@@ -72,23 +53,35 @@ namespace NotesApp.IntegrationTests.Helpers
             {
                 new Note()
                 {
-                    Id = "1",
+                    Id = "64b702c4576ee1a2851b73a9",
                     Title = "Travel Plans",
                     Description = "note desc",
                     Priority = "LOW",
                     Status = "NOT STARTED",
-                    UserId = "1"
+                    UserId = "64b6f787ff6d89b317265d22"
                 },
                 new Note()
                 {
-                    Id = "2",
+                    Id = "64b7038f0568a90a367709d8",
                     Title = "Dinner Plan",
                     Description = "Reserve a table",
                     Priority = "HIGH",
                     Status = "COMPLETED",
-                    UserId = "1"
+                    UserId = "64b6f787ff6d89b317265d22"
                 }
             };
+        }
+
+
+
+        public static void ReinitializeDb(CustomWebApplicationFactory<Program> factory)
+        {
+            using (var scope = factory.Services.CreateScope())
+            {
+                var scopedServices = scope.ServiceProvider;
+                var db = scopedServices.GetRequiredService<IMongoDatabase>();
+                Utilities.ReinitializeDbForTests(db);
+            }
         }
 
 
