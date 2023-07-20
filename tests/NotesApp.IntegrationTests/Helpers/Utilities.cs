@@ -5,66 +5,48 @@ using MongoDB.Driver;
 using Microsoft.Extensions.DependencyInjection;
 using NotesApp.Infrastructure.Data;
 using Microsoft.Extensions.Configuration;
+using AutoFixture;
+using MongoDB.Bson;
 
 namespace NotesApp.IntegrationTests.Helpers
 {
+
     public static class Utilities
     {
-        public static UserLoginDto validUserLogin => new UserLoginDto
-        {
-            Email = "aashik@gmail.com",
-            Password = "TestPassword123!"
-        };
+        private static Fixture fixture = new Fixture();
 
+        public static UserLoginDto validUserLogin = GenerateUserLoginDto();
+        private static List<User> seedUsers = GenerateSeedingUsers();
+        private static List<Note> seedNotes = GenerateSeedingNotes();
+       
+       
 
         public static void ReinitializeDbForTests(IMongoDatabase db, MongoDbSettings mongoDbSettings)
-        {          
-            db.DropCollection(mongoDbSettings.UsersCollectionName);
-            var users = db.GetCollection<User>(mongoDbSettings.UsersCollectionName);
-            users.InsertMany(GetSeedingUsers());
-            db.DropCollection(mongoDbSettings.NotesCollectionName);
-            var notes = db.GetCollection<Note>(mongoDbSettings.NotesCollectionName);
-            notes.InsertMany(GetSeedingNotes());          
+        {
+            try
+            {
+                db.DropCollection(mongoDbSettings.UsersCollectionName);
+                var users = db.GetCollection<User>(mongoDbSettings.UsersCollectionName);
+                users.InsertMany(GetSeedingUsers());
+                db.DropCollection(mongoDbSettings.NotesCollectionName);
+                var notes = db.GetCollection<Note>(mongoDbSettings.NotesCollectionName);
+                notes.InsertMany(GetSeedingNotes());
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+           
         }
 
         public static List<User> GetSeedingUsers()
         {
-            var passwordHasher = new PasswordHasher();
-            return new List<User>()
-            {
-                new User(){
-                    Id = "64b6f787ff6d89b317265d22",
-                    FirstName="Aashik",
-                    LastName="Villa",
-                    Email = validUserLogin.Email,
-                    Password = passwordHasher.HashPassword(validUserLogin.Password)                  
-                }
-            };
+            return seedUsers;
         }
 
         public static List<Note> GetSeedingNotes()
         {
-            return new List<Note>()
-            {
-                new Note()
-                {
-                    Id = "64b702c4576ee1a2851b73a9",
-                    Title = "Travel Plans",
-                    Description = "note desc",
-                    Priority = "LOW",
-                    Status = "NOT STARTED",
-                    UserId = "64b6f787ff6d89b317265d22"
-                },
-                new Note()
-                {
-                    Id = "64b7038f0568a90a367709d8",
-                    Title = "Dinner Plan",
-                    Description = "Reserve a table",
-                    Priority = "HIGH",
-                    Status = "COMPLETED",
-                    UserId = "64b6f787ff6d89b317265d22"
-                }
-            };
+            return seedNotes;
         }
 
 
@@ -84,5 +66,50 @@ namespace NotesApp.IntegrationTests.Helpers
         }
 
 
+        private static List<User> GenerateSeedingUsers()
+        {
+            var passwordHasher = new PasswordHasher();
+
+            var validUser = fixture.Build<User>()
+                .Without(x => x.Id)
+                .Without(x => x.Password)
+                .Do(x => x.Id = ObjectId.GenerateNewId().ToString())
+                .With(x => x.Email, validUserLogin.Email)
+                .With(x => x.Password, passwordHasher.HashPassword(validUserLogin.Password))
+                .Create();
+
+            var restUsers = fixture.Build<User>()
+                .Without(x => x.Id)
+                .Without(x => x.Password)
+                .Do(x => x.Id = ObjectId.GenerateNewId().ToString())
+                .Do(x => x.Password = passwordHasher.HashPassword( fixture.Create<string>()))
+                .CreateMany(3).ToList();
+
+            List<User> users = new List<User>() { validUser };
+            users.AddRange(restUsers);
+            return users;
+        }
+
+        private static List<Note> GenerateSeedingNotes()
+        {
+            List<Note> notes = seedUsers
+                .SelectMany(user => fixture.Build<Note>()
+                .Without(x => x.Id)
+                .Do(x => x.Id = ObjectId.GenerateNewId().ToString())
+                .With(x => x.UserId, user.Id)
+                .CreateMany(4))
+                .ToList();
+
+            return notes;
+        }
+
+        private static UserLoginDto GenerateUserLoginDto()
+        {
+            return new UserLoginDto
+            {
+                Email = fixture.Create<string>(),
+                Password = fixture.Create<string>()
+            };
+        }
     }
 }

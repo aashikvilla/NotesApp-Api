@@ -122,7 +122,7 @@ namespace NotesApp.IntegrationTests.Controllers
         {
             // Arrange         
             var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
-            var note = _fixture.Build<Note>().With(n => n.Id, "").With(n => n.UserId, userFromSeedData.Id).Create();
+            var note = _fixture.Build<Note>().With(n => n.Id, string.Empty).With(n => n.UserId, userFromSeedData.Id).Create();
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
             // Act

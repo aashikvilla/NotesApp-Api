@@ -64,7 +64,7 @@ namespace NotesApp.UnitTests.Application.Services
         public async Task AddNoteAsync_ShouldReturnNote_WhenNoteIsAddedSuccessfully()
         {
             // Arrange
-            var note = _fixture.Build<Note>().With(n=>n.Id,"").Create();
+            var note = _fixture.Build<Note>().With(n=>n.Id,string.Empty).Create();
             _noteRepositoryMock.Setup(x => x.GetNoteByIdAsync(note.Id)).ReturnsAsync(note);
           
             // Act

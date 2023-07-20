@@ -94,13 +94,14 @@ namespace NotesApp.IntegrationTests.Controllers
         [Fact]
         public async Task LoginAsync_ShouldReturnFailure_WhenPasswordIsIncorrect()
         {
-            // Arrange
+            // Arrange           
             Utilities.ReinitializeDb(_factory);
             var userLoginDto = new UserLoginDto
             {
                 Email = Utilities.validUserLogin.Email,
-                Password = "IncorrectPassword"  
+                Password = "IncorrectPassword"
             };
+
 
             // Act
             var response = await _client.PostAsJsonAsync(UrlRouteConstants.Login, userLoginDto);
