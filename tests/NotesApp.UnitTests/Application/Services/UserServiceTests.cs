@@ -80,7 +80,7 @@ namespace NotesApp.UnitTests.Application.Services
         {
             // Arrange
             var loginUserDto = _fixture.Create<UserLoginDto>();
-            var user = _fixture.Build<User>().Without(u => u.Notes).Create();
+            var user = _fixture.Build<User>().Create();
             var jwtToken = _fixture.Create<string>();
             var userDto = new UserDto
             {
@@ -130,7 +130,7 @@ namespace NotesApp.UnitTests.Application.Services
         {
             // Arrange
             var loginUserDto = _fixture.Create<UserLoginDto>();
-            var user = _fixture.Build<User>().Without(u => u.Notes).Create();
+            var user = _fixture.Build<User>().Create();
 
             _userRepositoryMock.Setup(x => x.GetUserByEmailAsync(loginUserDto.Email))
                 .ReturnsAsync(user);

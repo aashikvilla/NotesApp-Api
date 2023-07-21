@@ -1,22 +1,35 @@
-using Microsoft.EntityFrameworkCore;
 using NotesApp.Api.Middlewares;
 using NotesApp.Application.Services.Users;
 using NotesApp.Domain.RepositoryInterfaces;
-using NotesApp.Infrastructure.Data;
 using NotesApp.Infrastructure.Repositories;
 using NotesApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using NotesApp.Application.Services.Notes;
+using NotesApp.Infrastructure.Data;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Add services to the container.
 
+//Mongo Db setup
+builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
+
+MongoDbSettings mongoDbSettings = builder.Configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>();
+builder.Services.AddSingleton<IMongoClient, MongoClient>(_ =>
+{
+    return new MongoClient(mongoDbSettings?.ConnectionString);
+});
+builder.Services.AddSingleton<IMongoDatabase>(sp =>
+{
+    var mongoClient = sp.GetRequiredService<MongoClient>();
+    return mongoClient.GetDatabase(mongoDbSettings.DatabaseName);
+});
+
+
 builder.Services.AddControllers();
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();

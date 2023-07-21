@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using NotesApp.Api.Middlewares;
 using NotesApp.Infrastructure.Data;
 
@@ -26,19 +27,19 @@ namespace NotesApp.IntegrationTests.Helpers
 
             builder.ConfigureServices(services =>
             {
-                var descriptor = services.SingleOrDefault(
-                    d => d.ServiceType ==
-                        typeof(DbContextOptions<AppDbContext>));
+                var mongoDbSettings = Configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>();
 
-                if (descriptor != null)
+                // Setup MongoClient
+                services.AddSingleton<IMongoClient, MongoClient>(_ =>
                 {
-                    services.Remove(descriptor);
-                }
+                    return new MongoClient(mongoDbSettings?.ConnectionString);
+                });
 
-                // Use SQL Server for the tests and get connection string from appsettings.test.json
-                services.AddDbContext<AppDbContext>(options =>
+                // Setup MongoDatabase
+                services.AddSingleton<IMongoDatabase>(sp =>
                 {
-                    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                    var mongoClient = sp.GetRequiredService<IMongoClient>();
+                    return mongoClient.GetDatabase(mongoDbSettings.DatabaseName); // use a test database for integration tests
                 });
 
                 // Build the service provider.
@@ -48,17 +49,12 @@ namespace NotesApp.IntegrationTests.Helpers
                 // context (AppDbContext).
                 using var scope = sp.CreateScope();
                 var scopedServices = scope.ServiceProvider;
-                var db = scopedServices.GetRequiredService<AppDbContext>();
+                var db = scopedServices.GetRequiredService<IMongoDatabase>();
 
-               
-
-
-                // Ensure the database is created.
-                db.Database.EnsureCreated();
 
                 try
                 {
-                    Utilities.ReinitializeDbForTests(db);
+                    Utilities.ReinitializeDbForTests(db, mongoDbSettings);
                 }
                 catch (Exception ex)
                 {

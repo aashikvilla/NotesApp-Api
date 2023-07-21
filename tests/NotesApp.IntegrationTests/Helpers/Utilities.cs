@@ -1,96 +1,115 @@
 ﻿using NotesApp.Domain.Entities;
-using NotesApp.Infrastructure.Data;
 using NotesApp.Application.Dto;
 using NotesApp.Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
+using Microsoft.Extensions.DependencyInjection;
+using NotesApp.Infrastructure.Data;
+using Microsoft.Extensions.Configuration;
+using AutoFixture;
+using MongoDB.Bson;
 
 namespace NotesApp.IntegrationTests.Helpers
 {
+
     public static class Utilities
     {
-        public static UserLoginDto validUserLogin => new UserLoginDto
-        {
-            Email = "aashik@gmail.com",
-            Password = "TestPassword123!"
-        };
+        private static Fixture fixture = new Fixture();
 
-        public static void InitializeDbForTests(AppDbContext db)
+        public static UserLoginDto validUserLogin = GenerateUserLoginDto();
+        private static List<User> seedUsers = GenerateSeedingUsers();
+        private static List<Note> seedNotes = GenerateSeedingNotes();
+       
+       
+
+        public static void ReinitializeDbForTests(IMongoDatabase db, MongoDbSettings mongoDbSettings)
         {
-            using (var transaction = db.Database.BeginTransaction())
+            try
             {
-                // Turn identity insert ON for Users
-                db.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Users ON;");
-
-                // Add users 
-                db.Users.AddRange(GetSeedingUsers());
-                db.SaveChanges();
-
-                // Turn identity insert OFF for Users
-                db.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Users OFF;");
-
-
-                // Turn identity insert ON for Notes
-                db.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Notes ON;");
-
-                // Add users 
-                db.Notes.AddRange(GetSeedingNotes());
-                db.SaveChanges();
-
-                // Turn identity insert OFF for Notes
-                db.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Notes OFF;");
-
-                transaction.Commit();
+                db.DropCollection(mongoDbSettings.UsersCollectionName);
+                var users = db.GetCollection<User>(mongoDbSettings.UsersCollectionName);
+                users.InsertMany(GetSeedingUsers());
+                db.DropCollection(mongoDbSettings.NotesCollectionName);
+                var notes = db.GetCollection<Note>(mongoDbSettings.NotesCollectionName);
+                notes.InsertMany(GetSeedingNotes());
             }
-        }
-
-
-        public static void ReinitializeDbForTests(AppDbContext db)
-        {
-            db.Users.RemoveRange(db.Users);
-            db.Notes.RemoveRange(db.Notes);
-            InitializeDbForTests(db);
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+           
         }
 
         public static List<User> GetSeedingUsers()
         {
-            var passwordHasher = new PasswordHasher();
-            return new List<User>()
-            {
-                new User(){
-                    Id = 1,
-                    FirstName="Aashik",
-                    LastName="Villa",
-                    Email = validUserLogin.Email,
-                    Password = passwordHasher.HashPassword(validUserLogin.Password)                  
-                }
-            };
+            return seedUsers;
         }
 
         public static List<Note> GetSeedingNotes()
         {
-            return new List<Note>()
-            {
-                new Note()
-                {
-                    Id = 1,
-                    Title = "Travel Plans",
-                    Description = "note desc",
-                    Priority = "LOW",
-                    Status = "NOT STARTED",
-                    UserId = 1
-                },
-                new Note()
-                {
-                    Id = 2,
-                    Title = "Dinner Plan",
-                    Description = "Reserve a table",
-                    Priority = "HIGH",
-                    Status = "COMPLETED",
-                    UserId = 1
-                }
-            };
+            return seedNotes;
         }
 
 
+
+        public static void ReinitializeDb(CustomWebApplicationFactory<Program> factory)
+        {
+            using (var scope = factory.Services.CreateScope())
+            {
+                var scopedServices = scope.ServiceProvider;
+                var db = scopedServices.GetRequiredService<IMongoDatabase>();
+
+                var configuration = scopedServices.GetRequiredService<IConfiguration>();
+                var mongoDbSettings = configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>();
+
+                Utilities.ReinitializeDbForTests(db, mongoDbSettings);
+            }
+        }
+
+
+        private static List<User> GenerateSeedingUsers()
+        {
+            var passwordHasher = new PasswordHasher();
+
+            var validUser = fixture.Build<User>()
+                .Without(x => x.Id)
+                .Without(x => x.Password)
+                .Do(x => x.Id = ObjectId.GenerateNewId().ToString())
+                .With(x => x.Email, validUserLogin.Email)
+                .With(x => x.Password, passwordHasher.HashPassword(validUserLogin.Password))
+                .Create();
+
+            var restUsers = fixture.Build<User>()
+                .Without(x => x.Id)
+                .Without(x => x.Password)
+                .Do(x => x.Id = ObjectId.GenerateNewId().ToString())
+                .Do(x => x.Password = passwordHasher.HashPassword( fixture.Create<string>()))
+                .CreateMany(3).ToList();
+
+            List<User> users = new List<User>() { validUser };
+            users.AddRange(restUsers);
+            return users;
+        }
+
+        private static List<Note> GenerateSeedingNotes()
+        {
+            List<Note> notes = seedUsers
+                .SelectMany(user => fixture.Build<Note>()
+                .Without(x => x.Id)
+                .Do(x => x.Id = ObjectId.GenerateNewId().ToString())
+                .With(x => x.UserId, user.Id)
+                .CreateMany(4))
+                .ToList();
+
+            return notes;
+        }
+
+        private static UserLoginDto GenerateUserLoginDto()
+        {
+            return new UserLoginDto
+            {
+                Email = fixture.Create<string>(),
+                Password = fixture.Create<string>()
+            };
+        }
     }
 }

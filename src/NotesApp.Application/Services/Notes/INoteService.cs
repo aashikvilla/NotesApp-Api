@@ -4,9 +4,9 @@ namespace NotesApp.Application.Services.Notes
 {
     public interface INoteService
     {
-        Task<IEnumerable<Note>> GetNotesForUserAsync(int userId);
+        Task<IEnumerable<Note>> GetNotesForUserAsync(string userId);
         Task<Note> AddNoteAsync(Note note);
         Task<Note> UpdateNoteAsync(Note note);
-        Task DeleteNoteAsync(int noteId);
+        Task DeleteNoteAsync(string noteId);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using NotesApp.Application.Common;
 using NotesApp.Application.Services.Notes;
 using NotesApp.Domain.Entities;
@@ -20,9 +21,9 @@ namespace NotesApp.Api.Controllers
         }
 
         [HttpGet("GetNotesForUser/{userId}")]
-        public async Task<IActionResult> GetNotesForUserAsync(int userId)
+        public async Task<IActionResult> GetNotesForUserAsync(string userId)
         {
-            if(userId <= 0) 
+            if (string.IsNullOrEmpty(userId) || !ObjectId.TryParse(userId, out _))
             {
                 return BadRequest(ResponseMessages.InvalidUserId); 
             }
@@ -45,9 +46,9 @@ namespace NotesApp.Api.Controllers
         }
 
         [HttpDelete("DeleteNote/{noteId}")]
-        public async Task<IActionResult> DeleteNoteAsync(int noteId)
+        public async Task<IActionResult> DeleteNoteAsync(string noteId)
         {
-            if (noteId <= 0)
+            if (string.IsNullOrEmpty(noteId) || !ObjectId.TryParse(noteId, out _))
             {
                 return BadRequest(ResponseMessages.InvalidNoteId);
             }

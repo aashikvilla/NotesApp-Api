@@ -27,7 +27,7 @@ namespace NotesApp.UnitTests.Application.Services
         public async Task GetNotesForUserAsync_ShouldReturnNotes_WhenUserExists()
         {
             // Arrange
-            var userId = _fixture.Create<int>();
+            var userId = _fixture.Create<string>();
             var notes = _fixture.CreateMany<Note>(5);
 
             _userRepositoryMock.Setup(x => x.GetUserByIdAsync(userId)).ReturnsAsync(new User());
@@ -47,7 +47,7 @@ namespace NotesApp.UnitTests.Application.Services
         public async Task GetNotesForUserAsync_ShouldThrowException_WhenUserDoesNotExist()
         {
             // Arrange
-            var userId = _fixture.Create<int>();
+            var userId = _fixture.Create<string>();
 
             _userRepositoryMock.Setup(s => s.GetUserByIdAsync(userId))
                 .ReturnsAsync((User)null);
@@ -64,7 +64,7 @@ namespace NotesApp.UnitTests.Application.Services
         public async Task AddNoteAsync_ShouldReturnNote_WhenNoteIsAddedSuccessfully()
         {
             // Arrange
-            var note = _fixture.Build<Note>().With(n=>n.Id,0).Create();
+            var note = _fixture.Build<Note>().With(n=>n.Id,string.Empty).Create();
             _noteRepositoryMock.Setup(x => x.GetNoteByIdAsync(note.Id)).ReturnsAsync(note);
           
             // Act
@@ -128,7 +128,7 @@ namespace NotesApp.UnitTests.Application.Services
         public async Task DeleteNoteAsync_ShouldNotThrowException_WhenNoteIsDeletedSuccessfully()
         {      
             // Arrange
-            var noteId = _fixture.Create<int>();
+            var noteId = _fixture.Create<string>();
             _noteRepositoryMock.Setup(x => x.GetNoteByIdAsync(noteId)).ReturnsAsync(new Note());
 
             // Act
@@ -143,7 +143,7 @@ namespace NotesApp.UnitTests.Application.Services
         public async Task DeleteNoteAsync_ShouldThrowException_WhenNoteDoesNotExist()
         {
             // Arrange
-            var noteId = _fixture.Create<int>();
+            var noteId = _fixture.Create<string>();
 
             _noteRepositoryMock.Setup(x => x.GetNoteByIdAsync(noteId))
                 .ReturnsAsync((Note)null);
