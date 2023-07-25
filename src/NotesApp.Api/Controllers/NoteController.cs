@@ -9,7 +9,7 @@ namespace NotesApp.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-  //  [Authorize]
+    [Authorize]
     public class NoteController : ControllerBase
     {
 
