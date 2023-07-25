@@ -1,4 +1,5 @@
 ﻿using NotesApp.Application.Common;
+using NotesApp.Application.Dto;
 using NotesApp.Domain.Entities;
 using NotesApp.Domain.RepositoryInterfaces;
 
@@ -60,6 +61,23 @@ namespace NotesApp.Application.Services.Notes
                 throw new InvalidOperationException(ResponseMessages.NoteNotFound);
             }
             await _noteRepository.DeleteNoteAsync(note);           
+        }
+
+
+        public async Task<PaginationResult<Note>> GetNotesForUserAsync(string userId, int pageSize, int pageNumber, string searchTerm = "")
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new InvalidOperationException(ResponseMessages.UserNotFound);
+            }
+
+            return new PaginationResult<Note>
+            {
+                Data = (List<Note>)await _noteRepository.GetNotesForUserAsync(userId, pageSize, pageNumber, searchTerm),
+                Count = await _noteRepository.GetNoteCountForUserAsync(userId, searchTerm)
+            };
         }
     }
 }

@@ -126,6 +126,12 @@
   <data name="InvalidNoteId" xml:space="preserve">
     <value>Invalid NoteId</value>
   </data>
+  <data name="InvalidPageNumber" xml:space="preserve">
+    <value>Invalid Page Number</value>
+  </data>
+  <data name="InvalidPageSize" xml:space="preserve">
+    <value>Invalid Page Size</value>
+  </data>
   <data name="InvalidPassword" xml:space="preserve">
     <value>Invalid Password.</value>
   </data>
