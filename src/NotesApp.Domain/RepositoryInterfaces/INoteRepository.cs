@@ -9,5 +9,7 @@ namespace NotesApp.Domain.RepositoryInterfaces
         Task AddNoteAsync(Note note);
         Task UpdateNoteAsync(Note note);
         Task DeleteNoteAsync(Note note);
+        Task<IEnumerable<Note>> GetNotesForUserAsync(string userId,int pageSize,int pageNumber, string seachTerm);
+        Task<long> GetNoteCountForUserAsync(string userId, string seachTerm);
     }
 }

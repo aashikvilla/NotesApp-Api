@@ -57,5 +57,25 @@ namespace NotesApp.Api.Controllers
         }
 
 
+        [HttpGet("GetNotesForUserWithPagination/{userId}")]
+        public async Task<IActionResult> GetNotesForUserAsync(string userId, [FromQuery] int pageSize=5, [FromQuery] int pageNumber=1,[FromQuery] string? searchTerm="")
+        {
+            if (pageNumber <= 0)
+            {
+                return BadRequest(ResponseMessages.InvalidPageNumber);
+            }
+            if(pageSize <= 0)
+            {
+                return BadRequest(ResponseMessages.InvalidPageSize);
+            }
+            if (string.IsNullOrEmpty(userId) || !ObjectId.TryParse(userId, out _))
+            {
+                return BadRequest(ResponseMessages.InvalidUserId);
+            }
+            var notes = await _noteService.GetNotesForUserAsync(userId,pageSize,pageNumber,searchTerm);
+            return Ok(notes);
+        }
+
+
     }
 }

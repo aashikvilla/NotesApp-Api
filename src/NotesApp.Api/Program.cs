@@ -9,6 +9,7 @@ using System.Text;
 using NotesApp.Application.Services.Notes;
 using NotesApp.Infrastructure.Data;
 using MongoDB.Driver;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,10 +25,21 @@ builder.Services.AddSingleton<IMongoClient, MongoClient>(_ =>
 });
 builder.Services.AddSingleton<IMongoDatabase>(sp =>
 {
-    var mongoClient = sp.GetRequiredService<MongoClient>();
+    var mongoClient = sp.GetRequiredService<IMongoClient>();
     return mongoClient.GetDatabase(mongoDbSettings.DatabaseName);
 });
 
+// Add CORS services to the services container
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
 
 builder.Services.AddControllers();
 
@@ -64,9 +76,35 @@ builder.Services.AddAuthentication(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
+
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "JWT Authentication",
+        Description = "Enter your JWT token below:",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer", // must be lower case
+        BearerFormat = "JWT",
+        Reference = new OpenApiReference
+        {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme
+        }
+    };
+
+    c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { securityScheme, Array.Empty<string>() }
+    });
+});
+
 
 var app = builder.Build();
+
 
 app.UseMiddleware<ExceptionMiddleware>();
 
@@ -74,12 +112,16 @@ app.UseMiddleware<ExceptionMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+    });
 }
 
-app.UseHttpsRedirection();
+app.UseCors("AllowAllOrigins");
+//app.UseHttpsRedirection();
 
-app.UseAuthentication(); // Add this
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

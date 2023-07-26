@@ -88,6 +88,24 @@ namespace NotesApp.Application.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Page Number.
+        /// </summary>
+        public static string InvalidPageNumber {
+            get {
+                return ResourceManager.GetString("InvalidPageNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Page Size.
+        /// </summary>
+        public static string InvalidPageSize {
+            get {
+                return ResourceManager.GetString("InvalidPageSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid Password..
         /// </summary>
         public static string InvalidPassword {
