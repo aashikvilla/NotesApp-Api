@@ -1,5 +1,6 @@
 ﻿using NotesApp.Application.Common;
 using NotesApp.Application.Dto;
+using NotesApp.Common.Models;
 using NotesApp.Domain.Entities;
 using NotesApp.Domain.RepositoryInterfaces;
 
@@ -64,7 +65,7 @@ namespace NotesApp.Application.Services.Notes
         }
 
 
-        public async Task<PaginationResult<Note>> GetNotesForUserAsync(string userId, int pageSize, int pageNumber, string searchTerm = "")
+        public async Task<PaginationResult<Note>> GetNotesForUserAsync(string userId, DataQueryParameters parameters)
         {
             var user = await _userRepository.GetUserByIdAsync(userId);
 
@@ -72,12 +73,7 @@ namespace NotesApp.Application.Services.Notes
             {
                 throw new InvalidOperationException(ResponseMessages.UserNotFound);
             }
-
-            return new PaginationResult<Note>
-            {
-                Data = (List<Note>)await _noteRepository.GetNotesForUserAsync(userId, pageSize, pageNumber, searchTerm),
-                Count = await _noteRepository.GetNoteCountForUserAsync(userId, searchTerm)
-            };
+            return await _noteRepository.GetNotesForUserAsync(userId, parameters);
         }
     }
 }

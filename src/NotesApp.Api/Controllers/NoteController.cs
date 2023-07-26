@@ -2,14 +2,16 @@
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using NotesApp.Application.Common;
+using NotesApp.Application.Dto;
 using NotesApp.Application.Services.Notes;
+using NotesApp.Common.Models;
 using NotesApp.Domain.Entities;
 
 namespace NotesApp.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class NoteController : ControllerBase
     {
 
@@ -58,13 +60,13 @@ namespace NotesApp.Api.Controllers
 
 
         [HttpGet("GetNotesForUserWithPagination/{userId}")]
-        public async Task<IActionResult> GetNotesForUserAsync(string userId, [FromQuery] int pageSize=5, [FromQuery] int pageNumber=1,[FromQuery] string? searchTerm="")
+        public async Task<IActionResult> GetNotesForUserAsync(string userId, [FromQuery] DataQueryParameters parameters)
         {
-            if (pageNumber <= 0)
+            if (parameters.PageNumber <= 0)
             {
                 return BadRequest(ResponseMessages.InvalidPageNumber);
             }
-            if(pageSize <= 0)
+            if(parameters.PageSize <= 0)
             {
                 return BadRequest(ResponseMessages.InvalidPageSize);
             }
@@ -72,7 +74,7 @@ namespace NotesApp.Api.Controllers
             {
                 return BadRequest(ResponseMessages.InvalidUserId);
             }
-            var notes = await _noteService.GetNotesForUserAsync(userId,pageSize,pageNumber,searchTerm);
+            var notes = await _noteService.GetNotesForUserAsync(userId,parameters);
             return Ok(notes);
         }
 
