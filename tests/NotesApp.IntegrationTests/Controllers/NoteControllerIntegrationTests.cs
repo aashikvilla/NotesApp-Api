@@ -296,14 +296,14 @@ namespace NotesApp.IntegrationTests.Controllers
             var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
             var userNotesFromSeedData = Utilities.GetSeedingNotes().Where(n => n.UserId == userFromSeedData.Id).ToList();
 
-            var numberGenerator = _fixture.Create<Generator<int>>();
-            var charGenerator = _fixture.Create<Generator<char>>();
+            var numberGenerator = _fixture.Create<Generator<int>>();            
+            var charGenerator = _fixture.Create<Generator<char>>(); 
 
             var parameters = new DataQueryParameters
             {
                 PageNumber = numberGenerator.First(a => a < 5 && a > 0),
                 PageSize = numberGenerator.First(a => a < 10 && a > 0),
-                SearchTerm = new string(charGenerator.Take(1).ToArray()),
+                SearchTerm = new string(charGenerator.Take(1).ToArray()), //using a single character instead of string to increase probability of filtered results
                 FilterColumns = new[] { nameof(Note.Description) },
                 FilterQueries = new[] { new string(charGenerator.Take(1).ToArray()) },
                 SortBy = nameof(Note.Id),
@@ -519,10 +519,12 @@ namespace NotesApp.IntegrationTests.Controllers
             var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
             var userNotesFromSeedData = Utilities.GetSeedingNotes().Where(n => n.UserId == userFromSeedData.Id).ToList();
 
+            var defaultPageSize = new DataQueryParameters().PageSize;
+
             var expectedResult = new PaginationResult<Note>()
             {
                 Data = userNotesFromSeedData
-                .Take(int.Parse(Constants.DefaultPageSize))
+                .Take(defaultPageSize)
                 .ToList(),
                 Count = userNotesFromSeedData.Count()
             };
@@ -552,7 +554,5 @@ namespace NotesApp.IntegrationTests.Controllers
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         }
-
-
     }
 }

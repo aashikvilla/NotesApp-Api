@@ -139,6 +139,7 @@ namespace NotesApp.IntegrationTests.Helpers
             var queryString = new StringBuilder();
             queryString.Append( query.Count == 0 ? string.Empty : query.ToString()+"&" );
 
+            // We are have custom logic for Filter parameters since HttpUtility does not support having multiple query parameters of same name
             foreach (var column in parameters.FilterColumns)
             {
                 queryString.Append($"{nameof(DataQueryParameters.FilterColumns)}={Uri.EscapeDataString(column)}&");
