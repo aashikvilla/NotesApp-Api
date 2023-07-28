@@ -30,9 +30,11 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
 });
 
 // Add CORS services to the services container
+var corsPolicy = builder.Configuration.GetValue<string>("CorsPolicy");
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
+    options.AddPolicy(corsPolicy,
         builder =>
         {
             builder.AllowAnyOrigin()
@@ -118,8 +120,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCors("AllowAllOrigins");
-//app.UseHttpsRedirection();
+app.UseCors(corsPolicy);
+
 
 app.UseAuthentication();
 app.UseAuthorization();
