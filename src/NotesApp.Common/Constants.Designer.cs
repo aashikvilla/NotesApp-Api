@@ -70,24 +70,6 @@ namespace NotesApp.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 1.
-        /// </summary>
-        public static string DefaultPageNumber {
-            get {
-                return ResourceManager.GetString("DefaultPageNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 10.
-        /// </summary>
-        public static string DefaultPageSize {
-            get {
-                return ResourceManager.GetString("DefaultPageSize", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to desc.
         /// </summary>
         public static string Descending {
