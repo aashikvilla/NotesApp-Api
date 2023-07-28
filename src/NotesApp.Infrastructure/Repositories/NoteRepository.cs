@@ -99,7 +99,6 @@ namespace NotesApp.Infrastructure.Repositories
                 Count = await _notes.CountDocumentsAsync(filter)
             };
         }
-
       
     }
 }

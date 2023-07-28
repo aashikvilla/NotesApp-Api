@@ -4,6 +4,7 @@ using MongoDB.Bson;
 using NotesApp.Application.Common;
 using NotesApp.Application.Dto;
 using NotesApp.Application.Services.Notes;
+using NotesApp.Common;
 using NotesApp.Common.Models;
 using NotesApp.Domain.Entities;
 
@@ -11,7 +12,7 @@ namespace NotesApp.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class NoteController : ControllerBase
     {
 
@@ -73,6 +74,17 @@ namespace NotesApp.Api.Controllers
             if (string.IsNullOrEmpty(userId) || !ObjectId.TryParse(userId, out _))
             {
                 return BadRequest(ResponseMessages.InvalidUserId);
+            }
+            if (!string.IsNullOrEmpty(parameters.SortOrder))
+            {
+                if(!(parameters.SortOrder == Constants.Ascending ||  parameters.SortOrder == Constants.Descending))
+                {
+                    return BadRequest(ResponseMessages.InvalidSortOrder);
+                }
+            }
+            if(parameters.FilterColumns.Length != parameters.FilterQueries.Length) 
+            {
+                return BadRequest(ResponseMessages.InvalidFilterParameters);
             }
             var notes = await _noteService.GetNotesForUserAsync(userId,parameters);
             return Ok(notes);

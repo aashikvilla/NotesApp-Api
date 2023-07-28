@@ -88,6 +88,15 @@ namespace NotesApp.IntegrationTests.TestConstants {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to /api/Note/GetNotesForUserWithPagination/{0}?.
+        /// </summary>
+        public static string GetNotesForUserWithParameters {
+            get {
+                return ResourceManager.GetString("GetNotesForUserWithParameters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to /api/User/login.
         /// </summary>
         public static string Login {

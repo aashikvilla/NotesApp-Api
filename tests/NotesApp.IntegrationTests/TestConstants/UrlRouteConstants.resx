@@ -126,6 +126,9 @@
   <data name="GetNotesForUser" xml:space="preserve">
     <value>/api/Note/GetNotesForUser/{0}</value>
   </data>
+  <data name="GetNotesForUserWithParameters" xml:space="preserve">
+    <value>/api/Note/GetNotesForUserWithPagination/{0}?</value>
+  </data>
   <data name="Login" xml:space="preserve">
     <value>/api/User/login</value>
   </data>

@@ -120,6 +120,12 @@
   <data name="Ascending" xml:space="preserve">
     <value>asc</value>
   </data>
+  <data name="DefaultPageNumber" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="DefaultPageSize" xml:space="preserve">
+    <value>10</value>
+  </data>
   <data name="Descending" xml:space="preserve">
     <value>desc</value>
   </data>

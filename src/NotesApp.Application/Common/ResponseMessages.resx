@@ -123,6 +123,12 @@
   <data name="EmailNotFound" xml:space="preserve">
     <value>Email not found.</value>
   </data>
+  <data name="InvalidFilterColumn" xml:space="preserve">
+    <value>Invalid Filter column : {0}</value>
+  </data>
+  <data name="InvalidFilterParameters" xml:space="preserve">
+    <value>Invalid Filter Parameters</value>
+  </data>
   <data name="InvalidNoteId" xml:space="preserve">
     <value>Invalid NoteId</value>
   </data>
@@ -134,6 +140,12 @@
   </data>
   <data name="InvalidPassword" xml:space="preserve">
     <value>Invalid Password.</value>
+  </data>
+  <data name="InvalidSortByColumn" xml:space="preserve">
+    <value>Invalid Sort By column : {0}</value>
+  </data>
+  <data name="InvalidSortOrder" xml:space="preserve">
+    <value>Invalid Sort Order</value>
   </data>
   <data name="InvalidUserId" xml:space="preserve">
     <value>Invalid UserId</value>

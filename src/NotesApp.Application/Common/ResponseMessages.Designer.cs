@@ -79,6 +79,24 @@ namespace NotesApp.Application.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Filter column : {0}.
+        /// </summary>
+        public static string InvalidFilterColumn {
+            get {
+                return ResourceManager.GetString("InvalidFilterColumn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Filter Parameters.
+        /// </summary>
+        public static string InvalidFilterParameters {
+            get {
+                return ResourceManager.GetString("InvalidFilterParameters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid NoteId.
         /// </summary>
         public static string InvalidNoteId {
@@ -111,6 +129,24 @@ namespace NotesApp.Application.Common {
         public static string InvalidPassword {
             get {
                 return ResourceManager.GetString("InvalidPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Sort By column : {0}.
+        /// </summary>
+        public static string InvalidSortByColumn {
+            get {
+                return ResourceManager.GetString("InvalidSortByColumn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Sort Order.
+        /// </summary>
+        public static string InvalidSortOrder {
+            get {
+                return ResourceManager.GetString("InvalidSortOrder", resourceCulture);
             }
         }
         
