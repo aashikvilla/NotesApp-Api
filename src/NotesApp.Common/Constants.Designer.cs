@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NotesApp.IntegrationTests.TestConstants {
+namespace NotesApp.Common {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace NotesApp.IntegrationTests.TestConstants {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class UrlRouteConstants {
+    public class Constants {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal UrlRouteConstants() {
+        internal Constants() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace NotesApp.IntegrationTests.TestConstants {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NotesApp.IntegrationTests.TestConstants.UrlRouteConstants", typeof(UrlRouteConstants).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NotesApp.Common.Constants", typeof(Constants).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,65 +61,20 @@ namespace NotesApp.IntegrationTests.TestConstants {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /api/Note/AddNote.
+        ///   Looks up a localized string similar to asc.
         /// </summary>
-        public static string AddNote {
+        public static string Ascending {
             get {
-                return ResourceManager.GetString("AddNote", resourceCulture);
+                return ResourceManager.GetString("Ascending", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /api/Note/DeleteNote/{0}.
+        ///   Looks up a localized string similar to desc.
         /// </summary>
-        public static string DeleteNote {
+        public static string Descending {
             get {
-                return ResourceManager.GetString("DeleteNote", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to /api/Note/GetNotesForUser/{0}.
-        /// </summary>
-        public static string GetNotesForUser {
-            get {
-                return ResourceManager.GetString("GetNotesForUser", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to /api/Note/GetNotesForUserWithPagination/{0}?.
-        /// </summary>
-        public static string GetNotesForUserWithParameters {
-            get {
-                return ResourceManager.GetString("GetNotesForUserWithParameters", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to /api/User/login.
-        /// </summary>
-        public static string Login {
-            get {
-                return ResourceManager.GetString("Login", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to /api/User/register.
-        /// </summary>
-        public static string Register {
-            get {
-                return ResourceManager.GetString("Register", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to /api/Note/UpdateNote.
-        /// </summary>
-        public static string UpdateNote {
-            get {
-                return ResourceManager.GetString("UpdateNote", resourceCulture);
+                return ResourceManager.GetString("Descending", resourceCulture);
             }
         }
     }

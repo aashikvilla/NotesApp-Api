@@ -10,4 +10,8 @@
     <PackageReference Include="MongoDB.Bson" Version="2.20.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NotesApp.Common\NotesApp.Common.csproj" />
+  </ItemGroup>
+
 </Project>

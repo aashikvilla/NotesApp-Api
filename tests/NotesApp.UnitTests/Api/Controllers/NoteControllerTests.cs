@@ -1,10 +1,14 @@
 ﻿using AutoFixture;
 using FluentAssertions;
+using FluentAssertions.Equivalency;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using Moq;
 using NotesApp.Api.Controllers;
+using NotesApp.Application.Common;
 using NotesApp.Application.Services.Notes;
+using NotesApp.Common;
+using NotesApp.Common.Models;
 using NotesApp.Domain.Entities;
 
 
@@ -88,5 +92,102 @@ namespace NotesApp.UnitTests.Api.Controllers
             _noteServiceMock.Verify(s => s.DeleteNoteAsync(noteId), Times.Once);
             result.Should().BeOfType<OkResult>();
         }
+
+        [Fact]
+        public async Task GetNotesForUserAsync_ShouldReturnBadRequest_WhenPageNumberIsInvalid()
+        {
+            // Arrange
+            var userId = ObjectId.GenerateNewId().ToString();
+            var parameters = _fixture.Build<DataQueryParameters>().With(f=>f.PageNumber,0).Create();            
+
+            // Act
+            var result = await _noteController.GetNotesForUserAsync(userId, parameters);
+
+            // Assert
+
+            result.Should().BeOfType<BadRequestObjectResult>().Which.Value.Should().Be(ResponseMessages.InvalidPageNumber);
+        }
+
+        [Fact]
+        public async Task GetNotesForUserAsync_ShouldReturnBadRequest_WhenPageSizeIsInvalid()
+        {
+            // Arrange
+            var userId = ObjectId.GenerateNewId().ToString();
+            var parameters = _fixture.Build<DataQueryParameters>().With(f => f.PageSize, 0).Create();
+
+            // Act
+            var result = await _noteController.GetNotesForUserAsync(userId, parameters);
+
+            // Assert
+            result.Should().BeOfType<BadRequestObjectResult>().Which.Value.Should().Be(ResponseMessages.InvalidPageSize);
+        }
+
+        [Fact]
+        public async Task GetNotesForUserAsync_ShouldReturnBadRequest_WhenUserIdIsInvalid()
+        {
+            // Arrange
+            var userId = _fixture.Create<string>();
+            var parameters = _fixture.Build<DataQueryParameters>().Create();
+
+            // Act
+            var result = await _noteController.GetNotesForUserAsync(userId, parameters);
+
+            // Assert
+            result.Should().BeOfType<BadRequestObjectResult>().Which.Value.Should().Be(ResponseMessages.InvalidUserId);
+        }
+
+        [Fact]
+        public async Task GetNotesForUserAsync_ShouldReturnBadRequest_WhenSortByIsInvalid()
+        {
+            // Arrange
+            var userId = ObjectId.GenerateNewId().ToString();
+            var parameters = _fixture.Build<DataQueryParameters>().Create();
+
+            // Act
+            var result = await _noteController.GetNotesForUserAsync(userId, parameters);
+
+            // Assert
+            result.Should().BeOfType<BadRequestObjectResult>().Which.Value.Should().Be(ResponseMessages.InvalidSortOrder);
+        }
+
+        [Fact]
+        public async Task GetNotesForUserAsync_ShouldReturnBadRequest_WhenFilterParametersAreInvalid()
+        {
+            // Arrange
+            var userId = ObjectId.GenerateNewId().ToString();
+            var parameters = _fixture.Build<DataQueryParameters>()
+                .With(f => f.SortOrder, Constants.Ascending)
+                .With(x => x.FilterColumns, _fixture.CreateMany<string>(1).ToArray())
+                .With(x => x.FilterQueries, _fixture.CreateMany<string>(2).ToArray())
+                .Create();
+
+            // Act
+            var result = await _noteController.GetNotesForUserAsync(userId, parameters);
+
+            // Assert
+            result.Should().BeOfType<BadRequestObjectResult>().Which.Value.Should().Be(ResponseMessages.InvalidFilterParameters);
+        }
+
+        [Fact]
+        public async Task GetNotesForUserAsync_ShouldReturnPaginationResult_WhenInputIsValid()
+        {
+            // Arrange
+            var userId = ObjectId.GenerateNewId().ToString();
+            var parameters = _fixture.Build<DataQueryParameters>()
+                .With(f=>f.SortOrder, Constants.Ascending)
+                .With(x => x.FilterColumns, _fixture.CreateMany<string>(25).ToArray())
+                .With(x => x.FilterQueries, _fixture.CreateMany<string>(25).ToArray())
+                .Create();
+            var expectedNotes = _fixture.Create<PaginationResult<Note>>();
+            _noteServiceMock.Setup(service => service.GetNotesForUserAsync(userId, parameters)).ReturnsAsync(expectedNotes);
+
+            // Act
+            var result = await _noteController.GetNotesForUserAsync(userId, parameters);
+
+            // Assert
+            result.Should().BeOfType<OkObjectResult>().Which.Value.Should().BeEquivalentTo(expectedNotes);
+           
+        }
+
     }
 }

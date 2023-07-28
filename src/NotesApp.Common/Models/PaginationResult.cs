@@ -1,4 +1,4 @@
-﻿namespace NotesApp.Application.Dto
+﻿namespace NotesApp.Common.Models
 {
     public class PaginationResult<T> where T : class
     {

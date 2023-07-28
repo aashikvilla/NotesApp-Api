@@ -3,6 +3,8 @@ using FluentAssertions;
 using Moq;
 using NotesApp.Application.Common;
 using NotesApp.Application.Services.Notes;
+using NotesApp.Common;
+using NotesApp.Common.Models;
 using NotesApp.Domain.Entities;
 using NotesApp.Domain.RepositoryInterfaces;
 
@@ -154,6 +156,87 @@ namespace NotesApp.UnitTests.Application.Services
             // Assert
             await act.Should().ThrowAsync<InvalidOperationException>()
                 .WithMessage(ResponseMessages.NoteNotFound);           
+        }
+
+
+        [Fact]
+        public async Task GetNotesForUserAsync_ShouldThrowException_WhenSortByIsInvalid()
+        {
+            // Arrange
+            var sortBy=_fixture.Create<string>();
+            var userId = _fixture.Create<string>();
+            var parameters = _fixture.Build<DataQueryParameters>()
+                .With(p=>p.SortBy, sortBy)
+                .Create();
+
+            // Act
+            Func<Task> act = async () => await _noteService.GetNotesForUserAsync(userId, parameters);
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>()
+                .WithMessage( string.Format(ResponseMessages.InvalidSortByColumn, sortBy));
+        }
+
+        [Fact]
+        public async Task GetNotesForUserAsync_ShouldThrowException_WhenFilterColumnIsInvalid()
+        {
+            // Arrange          
+            var userId = _fixture.Create<string>();
+            var invalidColumn = _fixture.Create<string>();
+            var parameters = _fixture.Build<DataQueryParameters>()
+                .With(p => p.SortBy, nameof(Note.Description))
+                .With(p=>p.FilterColumns, new string[] { invalidColumn })
+                .Create();
+
+            // Act
+            Func<Task> act = async () => await _noteService.GetNotesForUserAsync(userId, parameters);
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>()
+                .WithMessage(string.Format(ResponseMessages.InvalidFilterColumn, invalidColumn));
+        }
+
+        [Fact]
+        public async Task GetNotesForUserAsync_ShouldThrowException_WhenUserIsInvalid()
+        {
+            // Arrange
+            var userId = _fixture.Create<string>();
+            var parameters = _fixture.Build<DataQueryParameters>()
+               .With(p => p.SortBy, nameof(Note.Status))
+               .With(p => p.FilterColumns, new string[] { nameof(Note.Title) })
+               .Create();
+
+            _userRepositoryMock.Setup(s => s.GetUserByIdAsync(userId))
+                .ReturnsAsync((User)null);
+
+            // Act
+            Func<Task> act = async () => await _noteService.GetNotesForUserAsync(userId, parameters);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage(ResponseMessages.UserNotFound);
+        }
+
+        [Fact]
+        public async Task GetNotesForUserAsync_ShouldReturnNotes_ForValidUserAndParameters()
+        {
+            // Arrange
+            var userId = _fixture.Create<string>();
+            var expectedNotes = _fixture.Create<PaginationResult<Note>>();
+            var parameters = _fixture.Build<DataQueryParameters>()
+              .With(p => p.SortBy, nameof(Note.Description))
+              .With(p => p.FilterColumns, new string[] { nameof(Note.Description) })
+              .Create();
+
+            _userRepositoryMock.Setup(x => x.GetUserByIdAsync(userId)).ReturnsAsync(new User());
+            _noteRepositoryMock.Setup(r => r.GetNotesForUserAsync(userId,parameters)).ReturnsAsync(expectedNotes);
+
+            // Act
+            var result = await _noteService.GetNotesForUserAsync(userId,parameters);
+
+            // Assert
+            result.Should().BeEquivalentTo(expectedNotes);
+
         }
 
     }

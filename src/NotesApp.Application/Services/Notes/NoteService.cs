@@ -1,5 +1,5 @@
 ﻿using NotesApp.Application.Common;
-using NotesApp.Application.Dto;
+using NotesApp.Common.Models;
 using NotesApp.Domain.Entities;
 using NotesApp.Domain.RepositoryInterfaces;
 
@@ -64,20 +64,38 @@ namespace NotesApp.Application.Services.Notes
         }
 
 
-        public async Task<PaginationResult<Note>> GetNotesForUserAsync(string userId, int pageSize, int pageNumber, string searchTerm = "")
+        public async Task<PaginationResult<Note>> GetNotesForUserAsync(string userId, DataQueryParameters parameters)
         {
+            if(!string.IsNullOrEmpty(parameters.SortBy)  && !IsValidColumnOfNote(parameters.SortBy)) 
+            {
+                throw new ArgumentException(string.Format(ResponseMessages.InvalidSortByColumn,parameters.SortBy));
+            }
+
+            if(parameters.FilterColumns.Length > 0)
+            {
+                foreach (var column in parameters.FilterColumns)
+                {
+                    if (!IsValidColumnOfNote(column))
+                    {
+                        throw new ArgumentException(string.Format(ResponseMessages.InvalidFilterColumn,column));
+                    }
+                }
+            }
+
             var user = await _userRepository.GetUserByIdAsync(userId);
 
             if (user == null)
             {
                 throw new InvalidOperationException(ResponseMessages.UserNotFound);
             }
+            return await _noteRepository.GetNotesForUserAsync(userId, parameters);
+        }
 
-            return new PaginationResult<Note>
-            {
-                Data = (List<Note>)await _noteRepository.GetNotesForUserAsync(userId, pageSize, pageNumber, searchTerm),
-                Count = await _noteRepository.GetNoteCountForUserAsync(userId, searchTerm)
-            };
+        private bool IsValidColumnOfNote(string propertyName)
+        {
+            var propertyNames = typeof(Note).GetProperties().Select(property => property.Name).ToList();
+
+            return propertyNames.Contains(propertyName);
         }
     }
 }
