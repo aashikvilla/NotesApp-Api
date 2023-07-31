@@ -1,15 +1,14 @@
 ﻿using AutoFixture;
 using FluentAssertions;
-using FluentAssertions.Equivalency;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using Moq;
 using NotesApp.Api.Controllers;
 using NotesApp.Application.Common;
+using NotesApp.Application.Dto;
 using NotesApp.Application.Services.Notes;
 using NotesApp.Common;
 using NotesApp.Common.Models;
-using NotesApp.Domain.Entities;
 
 
 namespace NotesApp.UnitTests.Api.Controllers
@@ -31,8 +30,8 @@ namespace NotesApp.UnitTests.Api.Controllers
         public async Task GetNotesForUser_ShouldReturnNotes_WhenUserExists()
         {
             // Arrange
-            var userId =ObjectId.GenerateNewId().ToString();
-            var notes = _fixture.CreateMany<Note>(5);
+            var userId = ObjectId.GenerateNewId().ToString();
+            var notes = _fixture.CreateMany<NoteDto>(5);
 
             _noteServiceMock.Setup(s => s.GetNotesForUserAsync(userId)).ReturnsAsync(notes);
 
@@ -48,7 +47,7 @@ namespace NotesApp.UnitTests.Api.Controllers
         public async Task AddNote_ShouldReturnCreatedNote_WhenModelStateIsValid()
         {
             // Arrange
-            var note = _fixture.Create<Note>();
+            var note = _fixture.Create<NoteDto>();
 
             _noteServiceMock.Setup(s => s.AddNoteAsync(note)).ReturnsAsync(note);
 
@@ -64,7 +63,7 @@ namespace NotesApp.UnitTests.Api.Controllers
         public async Task UpdateNote_ShouldReturnUpdatedNote_WhenUpdateIsSuccessful()
         {
             // Arrange
-            var note = _fixture.Create<Note>();
+            var note = _fixture.Create<NoteDto>();
 
             _noteServiceMock.Setup(s => s.UpdateNoteAsync(note)).ReturnsAsync(note);
 
@@ -98,7 +97,7 @@ namespace NotesApp.UnitTests.Api.Controllers
         {
             // Arrange
             var userId = ObjectId.GenerateNewId().ToString();
-            var parameters = _fixture.Build<DataQueryParameters>().With(f=>f.PageNumber,0).Create();            
+            var parameters = _fixture.Build<DataQueryParameters>().With(f => f.PageNumber, 0).Create();
 
             // Act
             var result = await _noteController.GetNotesForUserAsync(userId, parameters);
@@ -174,11 +173,11 @@ namespace NotesApp.UnitTests.Api.Controllers
             // Arrange
             var userId = ObjectId.GenerateNewId().ToString();
             var parameters = _fixture.Build<DataQueryParameters>()
-                .With(f=>f.SortOrder, Constants.Ascending)
+                .With(f => f.SortOrder, Constants.Ascending)
                 .With(x => x.FilterColumns, _fixture.CreateMany<string>(25).ToArray())
                 .With(x => x.FilterQueries, _fixture.CreateMany<string>(25).ToArray())
                 .Create();
-            var expectedNotes = _fixture.Create<PaginationResult<Note>>();
+            var expectedNotes = _fixture.Create<PaginationResult<NoteDto>>();
             _noteServiceMock.Setup(service => service.GetNotesForUserAsync(userId, parameters)).ReturnsAsync(expectedNotes);
 
             // Act
@@ -186,7 +185,7 @@ namespace NotesApp.UnitTests.Api.Controllers
 
             // Assert
             result.Should().BeOfType<OkObjectResult>().Which.Value.Should().BeEquivalentTo(expectedNotes);
-           
+
         }
 
     }

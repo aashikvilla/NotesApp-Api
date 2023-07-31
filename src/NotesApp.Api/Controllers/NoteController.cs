@@ -6,7 +6,6 @@ using NotesApp.Application.Dto;
 using NotesApp.Application.Services.Notes;
 using NotesApp.Common;
 using NotesApp.Common.Models;
-using NotesApp.Domain.Entities;
 
 namespace NotesApp.Api.Controllers
 {
@@ -28,21 +27,21 @@ namespace NotesApp.Api.Controllers
         {
             if (string.IsNullOrEmpty(userId) || !ObjectId.TryParse(userId, out _))
             {
-                return BadRequest(ResponseMessages.InvalidUserId); 
+                return BadRequest(ResponseMessages.InvalidUserId);
             }
-            var notes= await _noteService.GetNotesForUserAsync(userId);
+            var notes = await _noteService.GetNotesForUserAsync(userId);
             return Ok(notes);
         }
 
         [HttpPost("AddNote")]
-        public async Task<IActionResult> AddNoteAsync(Note note)
+        public async Task<IActionResult> AddNoteAsync(NoteDto note)
         {
             var addedNote = await _noteService.AddNoteAsync(note);
             return Ok(addedNote);
         }
 
         [HttpPut("UpdateNote")]
-        public async Task<IActionResult> UpdateNoteAsync(Note note)
+        public async Task<IActionResult> UpdateNoteAsync(NoteDto note)
         {
             var updatedNote = await _noteService.UpdateNoteAsync(note);
             return Ok(updatedNote);
@@ -67,7 +66,7 @@ namespace NotesApp.Api.Controllers
             {
                 return BadRequest(ResponseMessages.InvalidPageNumber);
             }
-            if(parameters.PageSize <= 0)
+            if (parameters.PageSize <= 0)
             {
                 return BadRequest(ResponseMessages.InvalidPageSize);
             }
@@ -77,16 +76,16 @@ namespace NotesApp.Api.Controllers
             }
             if (!string.IsNullOrEmpty(parameters.SortOrder))
             {
-                if(!(parameters.SortOrder == Constants.Ascending ||  parameters.SortOrder == Constants.Descending))
+                if (!(parameters.SortOrder == Constants.Ascending || parameters.SortOrder == Constants.Descending))
                 {
                     return BadRequest(ResponseMessages.InvalidSortOrder);
                 }
             }
-            if(parameters.FilterColumns.Length != parameters.FilterQueries.Length) 
+            if (parameters.FilterColumns.Length != parameters.FilterQueries.Length)
             {
                 return BadRequest(ResponseMessages.InvalidFilterParameters);
             }
-            var notes = await _noteService.GetNotesForUserAsync(userId,parameters);
+            var notes = await _noteService.GetNotesForUserAsync(userId, parameters);
             return Ok(notes);
         }
 
