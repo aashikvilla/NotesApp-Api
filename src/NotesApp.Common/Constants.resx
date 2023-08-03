@@ -120,7 +120,16 @@
   <data name="Ascending" xml:space="preserve">
     <value>asc</value>
   </data>
+  <data name="Default" xml:space="preserve">
+    <value>default</value>
+  </data>
   <data name="Descending" xml:space="preserve">
     <value>desc</value>
+  </data>
+  <data name="NoteDtoAddRuleSet" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="NoteDtoUpdateRuleSet" xml:space="preserve">
+    <value>Update</value>
   </data>
 </root>

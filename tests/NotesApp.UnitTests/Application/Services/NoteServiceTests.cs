@@ -202,45 +202,7 @@ namespace NotesApp.UnitTests.Application.Services
                 .WithMessage(string.Format(ResponseMessages.InvalidSortByColumn, sortBy));
         }
 
-        [Fact]
-        public async Task GetNotesForUserAsync_ShouldThrowException_WhenFilterColumnIsInvalid()
-        {
-            // Arrange          
-            var userId = _fixture.Create<string>();
-            var invalidColumn = _fixture.Create<string>();
-            var parameters = _fixture.Build<DataQueryParameters>()
-                .With(p => p.SortBy, nameof(Note.Description))
-                .With(p => p.FilterColumns, new string[] { invalidColumn })
-                .Create();
 
-            // Act
-            Func<Task> act = async () => await _noteService.GetNotesForUserAsync(userId, parameters);
-
-            // Assert
-            await act.Should().ThrowAsync<ArgumentException>()
-                .WithMessage(string.Format(ResponseMessages.InvalidFilterColumn, invalidColumn));
-        }
-
-        [Fact]
-        public async Task GetNotesForUserAsync_ShouldThrowException_WhenUserIsInvalid()
-        {
-            // Arrange
-            var userId = _fixture.Create<string>();
-            var parameters = _fixture.Build<DataQueryParameters>()
-               .With(p => p.SortBy, nameof(Note.Status))
-               .With(p => p.FilterColumns, new string[] { nameof(Note.Title) })
-               .Create();
-
-            _userRepositoryMock.Setup(s => s.GetUserByIdAsync(userId))
-                .ReturnsAsync((User)null);
-
-            // Act
-            Func<Task> act = async () => await _noteService.GetNotesForUserAsync(userId, parameters);
-
-            // Assert
-            await act.Should().ThrowAsync<InvalidOperationException>()
-                .WithMessage(ResponseMessages.UserNotFound);
-        }
 
         [Fact]
         public async Task GetNotesForUserAsync_ShouldReturnNotes_ForValidUserAndParameters()

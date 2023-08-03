@@ -70,11 +70,38 @@ namespace NotesApp.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to default.
+        /// </summary>
+        public static string Default {
+            get {
+                return ResourceManager.GetString("Default", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to desc.
         /// </summary>
         public static string Descending {
             get {
                 return ResourceManager.GetString("Descending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add.
+        /// </summary>
+        public static string NoteDtoAddRuleSet {
+            get {
+                return ResourceManager.GetString("NoteDtoAddRuleSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update.
+        /// </summary>
+        public static string NoteDtoUpdateRuleSet {
+            get {
+                return ResourceManager.GetString("NoteDtoUpdateRuleSet", resourceCulture);
             }
         }
     }
