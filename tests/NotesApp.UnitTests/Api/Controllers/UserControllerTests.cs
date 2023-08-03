@@ -1,12 +1,13 @@
 ﻿using AutoFixture;
 using FluentAssertions;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NotesApp.Api.Controllers;
 using NotesApp.Application.Common;
 using NotesApp.Application.Dto;
 using NotesApp.Application.Services.Users;
-
+using NotesApp.Application.Validators.Users;
 
 namespace NotesApp.UnitTests.Api.Controllers
 {
@@ -15,12 +16,16 @@ namespace NotesApp.UnitTests.Api.Controllers
         private readonly Mock<IUserService> _userServiceMock;
         private readonly UserController _usersController;
         private readonly Fixture _fixture;
+        private readonly IValidator<UserRegisterDto> _userRegisterValidator;
+        private readonly IValidator<UserLoginDto> _userLoginValidator;
 
         public UserControllerTests()
         {
             _fixture = new Fixture();
             _userServiceMock = new Mock<IUserService>();
-            _usersController = new UserController(_userServiceMock.Object);
+            _userRegisterValidator = new UserRegisterDtoValidator();
+            _userLoginValidator = new UserLoginDtoValidator();
+            _usersController = new UserController(_userServiceMock.Object, _userRegisterValidator, _userLoginValidator);
         }
 
         [Fact]
@@ -43,19 +48,26 @@ namespace NotesApp.UnitTests.Api.Controllers
         }
 
         [Fact]
-        public async Task RegisterAsync_ShouldThrowException_WhenUserRegistrationFails()
+        public async Task RegisterAsync_ShouldBadRequest_WhenModelStateIsInvalid()
         {
             // Arrange
-            var userRegisterDto = _fixture.Create<UserRegisterDto>();
+            var userRegisterDto = new UserRegisterDto();
 
-            _userServiceMock.Setup(x => x.RegisterUserAsync(userRegisterDto))
-                .Throws(new InvalidOperationException(ResponseMessages.EmailAlreadyExists));
+            var expectedErrors = new string[]
+            {
+                ResponseMessages.EmailRequired,
+                ResponseMessages.PasswordRequired,
+                ResponseMessages.FirstNameRequired,
+                ResponseMessages.LastNameRequired
+            };
 
             // Act
-            Func<Task> act = () => _usersController.RegisterAsync(userRegisterDto);
+            var result = await _usersController.RegisterAsync(userRegisterDto);
 
             // Assert
-            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage(ResponseMessages.EmailAlreadyExists);
+            result.Should().BeOfType<BadRequestObjectResult>();
+            var errors = (result as BadRequestObjectResult).Value as IEnumerable<string>;
+            errors.Should().BeEquivalentTo(expectedErrors);
         }
 
         [Fact]
@@ -78,19 +90,25 @@ namespace NotesApp.UnitTests.Api.Controllers
         }
 
         [Fact]
-        public async Task LoginAsync_ShouldThrowException_WhenLoginCredentialsAreInvalid()
+        public async Task LoginAsync_ShouldBadRequest_WhenModelStateIsInvalid()
         {
             // Arrange
-            var userLoginDto = _fixture.Create<UserLoginDto>();
+            var userLoginDto = new UserLoginDto();
 
-            _userServiceMock.Setup(x => x.LoginUserAsync(userLoginDto))
-                .Throws(new Exception("Invalid password."));
+            var expectedErrors = new string[]
+            {
+                ResponseMessages.EmailRequired,
+                ResponseMessages.PasswordRequired
+            };
 
             // Act
-            Func<Task> act = () => _usersController.LoginAsync(userLoginDto);
+            var result = await _usersController.LoginAsync(userLoginDto);
 
             // Assert
-            await act.Should().ThrowAsync<Exception>().WithMessage("Invalid password.");
+            result.Should().BeOfType<BadRequestObjectResult>();
+            var errors = (result as BadRequestObjectResult).Value as IEnumerable<string>;
+            errors.Should().BeEquivalentTo(expectedErrors);
+
         }
 
 

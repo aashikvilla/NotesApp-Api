@@ -1,15 +1,19 @@
-using NotesApp.Api.Middlewares;
-using NotesApp.Application.Services.Users;
-using NotesApp.Domain.RepositoryInterfaces;
-using NotesApp.Infrastructure.Repositories;
-using NotesApp.Infrastructure.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using NotesApp.Application.Services.Notes;
-using NotesApp.Infrastructure.Data;
-using MongoDB.Driver;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
+using NotesApp.Api.Middlewares;
+using NotesApp.Application.Services.Notes;
+using NotesApp.Application.Services.Users;
+using NotesApp.Application.Validators.Common;
+using NotesApp.Application.Validators.Notes;
+using NotesApp.Application.Validators.Users;
+using NotesApp.Domain.RepositoryInterfaces;
+using NotesApp.Infrastructure.Data;
+using NotesApp.Infrastructure.Repositories;
+using NotesApp.Infrastructure.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -103,6 +107,14 @@ builder.Services.AddSwaggerGen(c =>
         { securityScheme, Array.Empty<string>() }
     });
 });
+
+
+builder.Services.AddValidatorsFromAssemblyContaining<NoteDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UserLoginDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UserRegisterDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<DataQueryParametersValidator>();
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
 var app = builder.Build();

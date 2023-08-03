@@ -1,19 +1,20 @@
 ﻿using AutoFixture;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using NotesApp.Application.Common;
+using NotesApp.Application.Dto;
+using NotesApp.Common;
+using NotesApp.Common.Models;
+using NotesApp.Domain.Entities;
+using NotesApp.Infrastructure.Services;
 using NotesApp.IntegrationTests.Helpers;
 using NotesApp.IntegrationTests.TestConstants;
-using System.Net.Http.Json;
 using System.Net;
-using FluentAssertions;
-using NotesApp.Domain.Entities;
-using Microsoft.Extensions.DependencyInjection;
-using NotesApp.Application.Common;
 using System.Net.Http.Headers;
-using NotesApp.Infrastructure.Services;
-using MongoDB.Driver;
-using MongoDB.Bson;
-using NotesApp.Common.Models;
-using NotesApp.Common;
+using System.Net.Http.Json;
 
 namespace NotesApp.IntegrationTests.Controllers
 {
@@ -47,6 +48,19 @@ namespace NotesApp.IntegrationTests.Controllers
             return _tokenService.GenerateToken(userFromSeedData);
         }
 
+        private NoteDto CreateNoteDto(Note note)
+        {
+            return new NoteDto
+            {
+                Id = note.Id,
+                Status = note.Status,
+                Title = note.Title,
+                Description = note.Description,
+                Priority = note.Priority,
+                UserId = note.UserId
+            };
+        }
+
 
         [Fact]
         public async Task GetNotesForUser_ShouldReturnUserNotes_WhenUserIsValid()
@@ -55,6 +69,7 @@ namespace NotesApp.IntegrationTests.Controllers
             Utilities.ReinitializeDb(_factory);
             var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
             var userNotesFromSeedData = Utilities.GetSeedingNotes().Where(n => n.UserId == userFromSeedData.Id);
+            var expecteedNotes = userNotesFromSeedData.Select(n => CreateNoteDto(n));
 
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
@@ -63,10 +78,10 @@ namespace NotesApp.IntegrationTests.Controllers
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            var notes = await response.Content.ReadFromJsonAsync<IEnumerable<Note>>();
+            var notes = await response.Content.ReadFromJsonAsync<IEnumerable<NoteDto>>();
 
             //check if id is auto generated
-            notes.Should().BeEquivalentTo(userNotesFromSeedData);
+            notes.Should().BeEquivalentTo(expecteedNotes);
         }
 
         [Fact]
@@ -124,7 +139,7 @@ namespace NotesApp.IntegrationTests.Controllers
         {
             // Arrange         
             var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
-            var note = _fixture.Build<Note>().With(n => n.Id, string.Empty).With(n => n.UserId, userFromSeedData.Id).Create();
+            var note = _fixture.Build<NoteDto>().With(n => n.Id, string.Empty).With(n => n.UserId, userFromSeedData.Id).Create();
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GetToken());
 
             // Act
@@ -132,7 +147,7 @@ namespace NotesApp.IntegrationTests.Controllers
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            var addedNote = await response.Content.ReadFromJsonAsync<Note>();
+            var addedNote = await response.Content.ReadFromJsonAsync<NoteDto>();
 
             //check if id is auto generated
             addedNote.Id.Should().NotBeEmpty();
@@ -159,7 +174,7 @@ namespace NotesApp.IntegrationTests.Controllers
         public async Task AddNote_ShouldReturnUnauthorized_WhenTokenIsNotPresent()
         {
             // Arrange
-            var note = _fixture.Create<Note>();
+            var note = _fixture.Create<NoteDto>();
 
             // Act
             var response = await _client.PostAsJsonAsync(UrlRouteConstants.AddNote, note);
@@ -184,7 +199,7 @@ namespace NotesApp.IntegrationTests.Controllers
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            var updatedNote = await response.Content.ReadFromJsonAsync<Note>();
+            var updatedNote = await response.Content.ReadFromJsonAsync<NoteDto>();
 
             //check if title is updated
             updatedNote.Title.Should().BeEquivalentTo(title);
@@ -214,7 +229,7 @@ namespace NotesApp.IntegrationTests.Controllers
         public async Task UpdateNote_ShouldReturnUnauthorized_WhenTokenIsNotPresent()
         {
             // Arrange
-            var note = _fixture.Create<Note>();
+            var note = _fixture.Create<NoteDto>();
 
             // Act
             var response = await _client.PutAsJsonAsync(UrlRouteConstants.UpdateNote, note);
@@ -296,8 +311,8 @@ namespace NotesApp.IntegrationTests.Controllers
             var userFromSeedData = Utilities.GetSeedingUsers().FirstOrDefault();
             var userNotesFromSeedData = Utilities.GetSeedingNotes().Where(n => n.UserId == userFromSeedData.Id).ToList();
 
-            var numberGenerator = _fixture.Create<Generator<int>>();            
-            var charGenerator = _fixture.Create<Generator<char>>(); 
+            var numberGenerator = _fixture.Create<Generator<int>>();
+            var charGenerator = _fixture.Create<Generator<char>>();
 
             var parameters = new DataQueryParameters
             {
@@ -319,11 +334,12 @@ namespace NotesApp.IntegrationTests.Controllers
                 .Where(n => n.Title.Contains(parameters.FilterQueries[0]));
 
 
-            var expectedResult = new PaginationResult<Note>()
+            var expectedResult = new PaginationResult<NoteDto>()
             {
-                Data = filteredNotes.OrderBy(o => parameters.SortBy)
+                Data = filteredNotes.OrderBy(o => o.Id)
                 .Skip(parameters.PageSize * (parameters.PageNumber - 1))
                 .Take(parameters.PageSize)
+                .Select(n => CreateNoteDto(n))
                 .ToList(),
                 Count = filteredNotes.Count()
             };
@@ -337,7 +353,7 @@ namespace NotesApp.IntegrationTests.Controllers
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            var paginationResult = await response.Content.ReadFromJsonAsync<PaginationResult<Note>>();
+            var paginationResult = await response.Content.ReadFromJsonAsync<PaginationResult<NoteDto>>();
             paginationResult.Should().BeEquivalentTo(expectedResult);
 
 
@@ -354,8 +370,8 @@ namespace NotesApp.IntegrationTests.Controllers
             var charGenerator = _fixture.Create<Generator<char>>();
 
             var parameters = new DataQueryParameters
-            {          
-                SearchTerm = new string(charGenerator.Take(1).ToArray())              
+            {
+                SearchTerm = new string(charGenerator.Take(1).ToArray())
             };
 
             var filteredNotes = userNotesFromSeedData
@@ -364,13 +380,14 @@ namespace NotesApp.IntegrationTests.Controllers
                     s.Status.Contains(parameters.SearchTerm, StringComparison.OrdinalIgnoreCase) ||
                     s.Priority.Contains(parameters.SearchTerm, StringComparison.OrdinalIgnoreCase)
                     ));
-               
 
 
-            var expectedResult = new PaginationResult<Note>()
+
+            var expectedResult = new PaginationResult<NoteDto>()
             {
-                Data = filteredNotes             
+                Data = filteredNotes
                 .Take(parameters.PageSize)
+                .Select(n => CreateNoteDto(n))
                 .ToList(),
                 Count = filteredNotes.Count()
             };
@@ -384,7 +401,7 @@ namespace NotesApp.IntegrationTests.Controllers
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            var paginationResult = await response.Content.ReadFromJsonAsync<PaginationResult<Note>>();
+            var paginationResult = await response.Content.ReadFromJsonAsync<PaginationResult<NoteDto>>();
             paginationResult.Should().BeEquivalentTo(expectedResult);
 
 
@@ -403,17 +420,18 @@ namespace NotesApp.IntegrationTests.Controllers
             var parameters = new DataQueryParameters
             {
                 FilterColumns = new[] { nameof(Note.Description) },
-                FilterQueries = new[] { new string(charGenerator.Take(1).ToArray()) }               
+                FilterQueries = new[] { new string(charGenerator.Take(1).ToArray()) }
             };
 
-            var filteredNotes = userNotesFromSeedData             
+            var filteredNotes = userNotesFromSeedData
                 .Where(n => n.Description.Contains(parameters.FilterQueries[0], StringComparison.OrdinalIgnoreCase));
 
 
-            var expectedResult = new PaginationResult<Note>()
+            var expectedResult = new PaginationResult<NoteDto>()
             {
                 Data = filteredNotes
                 .Take(parameters.PageSize)
+                .Select(n => CreateNoteDto(n))
                 .ToList(),
                 Count = filteredNotes.Count()
             };
@@ -427,7 +445,7 @@ namespace NotesApp.IntegrationTests.Controllers
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            var paginationResult = await response.Content.ReadFromJsonAsync<PaginationResult<Note>>();
+            var paginationResult = await response.Content.ReadFromJsonAsync<PaginationResult<NoteDto>>();
             paginationResult.Should().BeEquivalentTo(expectedResult);
 
 
@@ -447,10 +465,11 @@ namespace NotesApp.IntegrationTests.Controllers
                 SortOrder = Constants.Descending
             };
 
-            var expectedResult = new PaginationResult<Note>()
+            var expectedResult = new PaginationResult<NoteDto>()
             {
-                Data = userNotesFromSeedData.OrderByDescending(o => o.Id)              
+                Data = userNotesFromSeedData.OrderByDescending(o => o.Id)
                 .Take(parameters.PageSize)
+                .Select(n => CreateNoteDto(n))
                 .ToList(),
                 Count = userNotesFromSeedData.Count()
             };
@@ -464,7 +483,7 @@ namespace NotesApp.IntegrationTests.Controllers
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            var paginationResult = await response.Content.ReadFromJsonAsync<PaginationResult<Note>>();
+            var paginationResult = await response.Content.ReadFromJsonAsync<PaginationResult<NoteDto>>();
             paginationResult.Should().BeEquivalentTo(expectedResult);
 
 
@@ -487,11 +506,12 @@ namespace NotesApp.IntegrationTests.Controllers
                 PageSize = numberGenerator.First(a => a < 10 && a > 0)
             };
 
-            var expectedResult = new PaginationResult<Note>()
+            var expectedResult = new PaginationResult<NoteDto>()
             {
                 Data = userNotesFromSeedData
                 .Skip(parameters.PageSize * (parameters.PageNumber - 1))
                 .Take(parameters.PageSize)
+                .Select(n => CreateNoteDto(n))
                 .ToList(),
                 Count = userNotesFromSeedData.Count()
             };
@@ -505,7 +525,7 @@ namespace NotesApp.IntegrationTests.Controllers
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            var paginationResult = await response.Content.ReadFromJsonAsync<PaginationResult<Note>>();
+            var paginationResult = await response.Content.ReadFromJsonAsync<PaginationResult<NoteDto>>();
             paginationResult.Should().BeEquivalentTo(expectedResult);
 
 
@@ -521,10 +541,11 @@ namespace NotesApp.IntegrationTests.Controllers
 
             var defaultPageSize = new DataQueryParameters().PageSize;
 
-            var expectedResult = new PaginationResult<Note>()
+            var expectedResult = new PaginationResult<NoteDto>()
             {
                 Data = userNotesFromSeedData
                 .Take(defaultPageSize)
+                .Select(n => CreateNoteDto(n))
                 .ToList(),
                 Count = userNotesFromSeedData.Count()
             };
@@ -537,7 +558,7 @@ namespace NotesApp.IntegrationTests.Controllers
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            var paginationResult = await response.Content.ReadFromJsonAsync<PaginationResult<Note>>();
+            var paginationResult = await response.Content.ReadFromJsonAsync<PaginationResult<NoteDto>>();
             paginationResult.Should().BeEquivalentTo(expectedResult);
 
         }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using NotesApp.Application.Common;
@@ -6,7 +7,6 @@ using NotesApp.Application.Dto;
 using NotesApp.Application.Services.Notes;
 using NotesApp.Common;
 using NotesApp.Common.Models;
-using NotesApp.Domain.Entities;
 
 namespace NotesApp.Api.Controllers
 {
@@ -17,10 +17,15 @@ namespace NotesApp.Api.Controllers
     {
 
         private readonly INoteService _noteService;
+        private readonly IValidator<DataQueryParameters> _dataQueryParametersValidator;
+        private readonly IValidator<NoteDto> _noteDtoValidator;
 
-        public NoteController(INoteService noteService)
+
+        public NoteController(INoteService noteService, IValidator<NoteDto> noteDtoValidator, IValidator<DataQueryParameters> dataqueryParameterValidator)
         {
             _noteService = noteService;
+            _noteDtoValidator = noteDtoValidator;
+            _dataQueryParametersValidator = dataqueryParameterValidator;
         }
 
         [HttpGet("GetNotesForUser/{userId}")]
@@ -28,22 +33,34 @@ namespace NotesApp.Api.Controllers
         {
             if (string.IsNullOrEmpty(userId) || !ObjectId.TryParse(userId, out _))
             {
-                return BadRequest(ResponseMessages.InvalidUserId); 
+                return BadRequest(ResponseMessages.InvalidUserId);
             }
-            var notes= await _noteService.GetNotesForUserAsync(userId);
+            var notes = await _noteService.GetNotesForUserAsync(userId);
             return Ok(notes);
         }
 
         [HttpPost("AddNote")]
-        public async Task<IActionResult> AddNoteAsync(Note note)
+        public async Task<IActionResult> AddNoteAsync(NoteDto note)
         {
+            var validationResult = _noteDtoValidator.Validate(note, options => options.IncludeRuleSets(Constants.NoteDtoAddRuleSet, Constants.Default));
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
+            }
             var addedNote = await _noteService.AddNoteAsync(note);
             return Ok(addedNote);
         }
 
         [HttpPut("UpdateNote")]
-        public async Task<IActionResult> UpdateNoteAsync(Note note)
+        public async Task<IActionResult> UpdateNoteAsync(NoteDto note)
         {
+            var validationResult = _noteDtoValidator.Validate(note, options => options.IncludeRuleSets(Constants.NoteDtoUpdateRuleSet, Constants.Default));
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
+            }
             var updatedNote = await _noteService.UpdateNoteAsync(note);
             return Ok(updatedNote);
         }
@@ -63,30 +80,18 @@ namespace NotesApp.Api.Controllers
         [HttpGet("GetNotesForUserWithPagination/{userId}")]
         public async Task<IActionResult> GetNotesForUserAsync(string userId, [FromQuery] DataQueryParameters parameters)
         {
-            if (parameters.PageNumber <= 0)
-            {
-                return BadRequest(ResponseMessages.InvalidPageNumber);
-            }
-            if(parameters.PageSize <= 0)
-            {
-                return BadRequest(ResponseMessages.InvalidPageSize);
-            }
             if (string.IsNullOrEmpty(userId) || !ObjectId.TryParse(userId, out _))
             {
                 return BadRequest(ResponseMessages.InvalidUserId);
             }
-            if (!string.IsNullOrEmpty(parameters.SortOrder))
+
+            var validationResult = _dataQueryParametersValidator.Validate(parameters);
+            if (!validationResult.IsValid)
             {
-                if(!(parameters.SortOrder == Constants.Ascending ||  parameters.SortOrder == Constants.Descending))
-                {
-                    return BadRequest(ResponseMessages.InvalidSortOrder);
-                }
+                return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
             }
-            if(parameters.FilterColumns.Length != parameters.FilterQueries.Length) 
-            {
-                return BadRequest(ResponseMessages.InvalidFilterParameters);
-            }
-            var notes = await _noteService.GetNotesForUserAsync(userId,parameters);
+
+            var notes = await _noteService.GetNotesForUserAsync(userId, parameters);
             return Ok(notes);
         }
 

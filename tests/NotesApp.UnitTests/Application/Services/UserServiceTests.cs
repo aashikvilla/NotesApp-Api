@@ -1,8 +1,10 @@
 ﻿using AutoFixture;
+using AutoMapper;
 using FluentAssertions;
 using Moq;
 using NotesApp.Application.Common;
 using NotesApp.Application.Dto;
+using NotesApp.Application.Profiles;
 using NotesApp.Application.Services.Users;
 using NotesApp.Domain.Entities;
 using NotesApp.Domain.RepositoryInterfaces;
@@ -17,10 +19,17 @@ namespace NotesApp.UnitTests.Application.Services
         private readonly Mock<IPasswordHasher> _passwordHasherMock = new();
         private readonly Mock<ITokenService> _tokenServiceMock = new();
         private readonly Fixture _fixture = new();
+        private readonly IMapper _mapper;
 
         public UserServiceTests()
         {
-            _userService = new UserService(_userRepositoryMock.Object, _passwordHasherMock.Object, _tokenServiceMock.Object);
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<UserProfile>();
+            });
+
+            _mapper = config.CreateMapper();
+            _userService = new UserService(_userRepositoryMock.Object, _passwordHasherMock.Object, _tokenServiceMock.Object, _mapper);
         }
 
         [Fact]
@@ -73,7 +82,7 @@ namespace NotesApp.UnitTests.Application.Services
             )), Times.Once);
         }
 
-      
+
 
         [Fact]
         public async Task LoginAsync_ShouldReturnUserDto_WhenCredentialsAreValid()

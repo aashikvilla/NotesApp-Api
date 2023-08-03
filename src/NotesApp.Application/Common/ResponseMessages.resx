@@ -117,11 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DescriptionRequired" xml:space="preserve">
+    <value>Description is Required</value>
+  </data>
   <data name="EmailAlreadyExists" xml:space="preserve">
     <value>Email already exists.</value>
   </data>
   <data name="EmailNotFound" xml:space="preserve">
     <value>Email not found.</value>
+  </data>
+  <data name="EmailRequired" xml:space="preserve">
+    <value>Email is Required</value>
+  </data>
+  <data name="FirstNameRequired" xml:space="preserve">
+    <value>FirstName is Required</value>
   </data>
   <data name="InvalidFilterColumn" xml:space="preserve">
     <value>Invalid Filter column : {0}</value>
@@ -150,6 +159,9 @@
   <data name="InvalidUserId" xml:space="preserve">
     <value>Invalid UserId</value>
   </data>
+  <data name="LastNameRequired" xml:space="preserve">
+    <value>LastName is Required </value>
+  </data>
   <data name="LoginSuccessful" xml:space="preserve">
     <value>Logged in successfully.</value>
   </data>
@@ -159,8 +171,23 @@
   <data name="NoteNotFound" xml:space="preserve">
     <value>Note not found.</value>
   </data>
+  <data name="PasswordRequired" xml:space="preserve">
+    <value>Password is Required</value>
+  </data>
+  <data name="PriorityRequired" xml:space="preserve">
+    <value>Priority is Required</value>
+  </data>
   <data name="RegistrationSuccessful" xml:space="preserve">
     <value>User registered successfully.</value>
+  </data>
+  <data name="StatusRequired" xml:space="preserve">
+    <value>Status is Required</value>
+  </data>
+  <data name="TitleRequired" xml:space="preserve">
+    <value>Title is Required</value>
+  </data>
+  <data name="UserIdRequired" xml:space="preserve">
+    <value>UserId is Required</value>
   </data>
   <data name="UserNotFound" xml:space="preserve">
     <value>User not found.</value>

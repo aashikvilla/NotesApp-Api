@@ -61,6 +61,15 @@ namespace NotesApp.Application.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Description is Required.
+        /// </summary>
+        public static string DescriptionRequired {
+            get {
+                return ResourceManager.GetString("DescriptionRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Email already exists..
         /// </summary>
         public static string EmailAlreadyExists {
@@ -75,6 +84,24 @@ namespace NotesApp.Application.Common {
         public static string EmailNotFound {
             get {
                 return ResourceManager.GetString("EmailNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email is Required.
+        /// </summary>
+        public static string EmailRequired {
+            get {
+                return ResourceManager.GetString("EmailRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to FirstName is Required.
+        /// </summary>
+        public static string FirstNameRequired {
+            get {
+                return ResourceManager.GetString("FirstNameRequired", resourceCulture);
             }
         }
         
@@ -160,6 +187,15 @@ namespace NotesApp.Application.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to LastName is Required .
+        /// </summary>
+        public static string LastNameRequired {
+            get {
+                return ResourceManager.GetString("LastNameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Logged in successfully..
         /// </summary>
         public static string LoginSuccessful {
@@ -187,11 +223,56 @@ namespace NotesApp.Application.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Password is Required.
+        /// </summary>
+        public static string PasswordRequired {
+            get {
+                return ResourceManager.GetString("PasswordRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Priority is Required.
+        /// </summary>
+        public static string PriorityRequired {
+            get {
+                return ResourceManager.GetString("PriorityRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User registered successfully..
         /// </summary>
         public static string RegistrationSuccessful {
             get {
                 return ResourceManager.GetString("RegistrationSuccessful", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Status is Required.
+        /// </summary>
+        public static string StatusRequired {
+            get {
+                return ResourceManager.GetString("StatusRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Title is Required.
+        /// </summary>
+        public static string TitleRequired {
+            get {
+                return ResourceManager.GetString("TitleRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UserId is Required.
+        /// </summary>
+        public static string UserIdRequired {
+            get {
+                return ResourceManager.GetString("UserIdRequired", resourceCulture);
             }
         }
         

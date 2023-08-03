@@ -1,4 +1,5 @@
-﻿using NotesApp.Application.Common;
+﻿using AutoMapper;
+using NotesApp.Application.Common;
 using NotesApp.Application.Dto;
 using NotesApp.Domain.Entities;
 using NotesApp.Domain.RepositoryInterfaces;
@@ -11,12 +12,14 @@ namespace NotesApp.Application.Services.Users
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly ITokenService _tokenService;
+        private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository, IPasswordHasher passwordHasher, ITokenService tokenService)
+        public UserService(IUserRepository userRepository, IPasswordHasher passwordHasher, ITokenService tokenService, IMapper mapper)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _tokenService = tokenService;
+            _mapper = mapper;
         }
 
         public async Task<UserDto> RegisterUserAsync(UserRegisterDto userRegisterDto)
@@ -26,23 +29,12 @@ namespace NotesApp.Application.Services.Users
                 throw new InvalidOperationException(ResponseMessages.EmailAlreadyExists);
             }
 
-            User user = new User
-            {
-                FirstName = userRegisterDto.FirstName,
-                LastName = userRegisterDto.LastName,
-                Email = userRegisterDto.Email,
-                Password = _passwordHasher.HashPassword(userRegisterDto.Password)
-            };
+            User user = _mapper.Map<User>(userRegisterDto);
+            user.Password = _passwordHasher.HashPassword(userRegisterDto.Password);
 
             await _userRepository.AddUserAsync(user);
 
-            UserDto userDto = new UserDto
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email
-            };
+            UserDto userDto = _mapper.Map<UserDto>(user);
 
             return userDto;
         }
@@ -59,7 +51,7 @@ namespace NotesApp.Application.Services.Users
 
             if (user == null)
             {
-                throw new UnauthorizedAccessException(ResponseMessages.EmailNotFound);                
+                throw new UnauthorizedAccessException(ResponseMessages.EmailNotFound);
             }
 
             if (!_passwordHasher.VerifyPassword(user.Password, userLoginDto.Password))
@@ -68,16 +60,8 @@ namespace NotesApp.Application.Services.Users
             }
 
             var token = _tokenService.GenerateToken(user);
-
-            UserDto userDto = new UserDto
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                Token = token
-            };
-
+            UserDto userDto = _mapper.Map<UserDto>(user);
+            userDto.Token = token;
             return userDto;
         }
     }
